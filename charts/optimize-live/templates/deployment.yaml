@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "optimize-live.fullname" . }}
+  labels:
+    {{- include "optimize-live.labels" . | nindent 4 }}
+  namespace: {{ include "optimize-live.namespace" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "optimize-live.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        configChecksum: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "optimize-live.selectorLabels" . | nindent 8 }}
+        helm.sh/chart-version: {{ .Chart.Version }}
+    spec:
+      enableServiceLinks: false
+      imagePullSecrets:
+      - name: {{ include "optimize-live.fullname" . }}-docker
+      serviceAccountName: {{ include "optimize-live.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          envFrom:
+          - secretRef:
+              name: {{ include "optimize-live.fullname" . }}
+          env:
+          - name: IMAGE_PULL_SECRET_NAME
+            value: {{ include "optimize-live.fullname" . }}-docker
+          - name: SF_CREDS_SECRET_NAME
+            value: {{ include "optimize-live.fullname" . }}
+{{- if .Values.metricsURL }}
+{{- if (ne "" .Values.metricsURL) }}
+          - name: METRICS_URL
+            value: {{ .Values.metricsURL }}
+{{- end }}
+{{- end }}
+{{- if .Values.storageClass }}
+{{- if (ne "" .Values.storageClass) }}
+          - name: TSDB_STORAGE_CLASS_NAME
+            value: {{ .Values.storageClass }}
+{{- end }}
+{{- end }}
+{{- if .Values.pvcSize }}
+{{- if (ne "" .Values.pvcSize) }}
+          - name: TSDB_PVC_SIZE
+            value: {{ .Values.pvcSize }}
+{{- end }}
+{{- end }}
+          - name: COMPONENT_TSDB_IMAGE
+            value: {{ .Values.component.image.tsdb.repository }}:{{ .Values.component.image.tsdb.tag }}
+          - name: COMPONENT_APPLIER_IMAGE
+            value: {{ .Values.component.image.applier.repository }}:{{ .Values.component.image.applier.tag }}
+          - name: COMPONENT_RECOMMENDER_IMAGE
+            value: {{ .Values.component.image.recommender.repository }}:{{ .Values.component.image.recommender.tag }}
+          - name: COMPONENT_GRAFANA_IMAGE
+            value: {{ .Values.component.image.grafana.repository }}:{{ .Values.component.image.grafana.tag }}
+          - name: CONTROLLER_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: CONTROLLER_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: CONTROLLER_SERVICE_ACCOUNT
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.serviceAccountName
+          - name: CHART_VERSION
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.labels['helm.sh/chart-version']
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: {{ .Values.component.image.controller.repository }}:{{ .Values.component.image.controller.tag }}
+          imagePullPolicy: {{ .Values.component.image.controller.pullPolicy }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
