@@ -1,0 +1,102 @@
+---
+type: default
+team: devops
+group: platform
+service: cortex
+# Valid groups: platform, drupal-cloud, marketing-cloud, acquia-shared
+
+
+# Validate the formatting of the pipeline.yaml file.
+validate_config: true
+
+# The environment container image is used to prepare code versions
+# and tooling for tests during pre, post and build stages.
+environment_image:
+  file: ".acquia/Dockerfile.ci"
+  context: "."
+  cache_from: 'devops-cortex-environment'
+  build_args:
+    - secrets:
+        - type: vault
+          key: SSH_KEY
+          value: GIT_SSH_KEY
+          path: secret/pipeline-default/GIT_SSH_KEY
+
+# -- Continuous Integration --
+# Pre-build runs after building the environment image, and relies on it to
+# run its sub-stages' steps inside of the environment container.
+pre_build:
+  cortex_docker_login:
+    - steps:
+        - "Pulling Cortex docker images":
+          -  echo "${CORTEX_REGISTRY_PWD}"| docker login docker.pkg.github.com -u gsdatta  --password-stdin
+          -  docker pull docker.pkg.github.com/cortexapps/brain-backend/cortex-onprem-backend:${CORTEX_VERSION}
+          -  docker pull docker.pkg.github.com/cortexapps/brain-app/cortex-onprem-frontend:${CORTEX_VERSION}
+      args: -v /var/run/docker.sock:/var/run/docker.sock --net=host
+      secrets:
+        - type: vault
+          key: CORTEX_REGISTRY_PWD
+          value: CORTEX_REGISTRY_PWD
+          path: secret/devops-cortex/CORTEX_REGISTRY_PWD
+          
+  code_analysis: 
+    required: false
+
+  security_composition_analysis:
+    required: false
+  
+# -- Service Containers (if applicable) --
+# This stage builds and publishes to Jfrog/ECR one or more service images.
+# https://github.com/acquia/devops-pipeline/blob/master/consumer/pipeline_get_started.md
+build:
+  service_image:
+    - name: cortex/backend
+      file: "Dockerfile"
+      context: "."
+      args: ""
+      cache_from: cortex/backend
+      build_args:
+        - "BASE_IMAGE_REPO=docker.pkg.github.com"
+        - "BASE_IMAGE_NAME=cortexapps/brain-backend/cortex-onprem-backend"
+        - "BASE_IMAGE_TAG=${CORTEX_VERSION}"
+    - name: cortex/frontend
+      file: "Dockerfile"
+      context: "."
+      args: ""
+      cache_from: cortex/frontend
+      build_args:
+        - "BASE_IMAGE_REPO=docker.pkg.github.com"
+        - "BASE_IMAGE_NAME=cortexapps/brain-app/cortex-onprem-frontend"
+        - "BASE_IMAGE_TAG=${CORTEX_VERSION}"
+       
+# This step performs container image security scan in Jfrog Xray via Artifactory
+# Build will fail whenever a vulnerability is found unless set to true.
+security_scan:
+  ignore_failures: true
+
+# -- Continuous Delivery & Deployment --
+# Cut a Release Tag automatically?
+cut_release_tag: false
+
+
+# Simply deploy to Kaas using "acd" and platform.yaml
+deploy:
+  - component: acd
+    require_production_approval: false    
+
+# -- Slack Bot Integration --
+notify:
+  channel: test-jenkins-notifications
+  on_success: change
+  on_failure: always
+    
+  approvers:
+    - "abhishek.ratnawat@acquia.com"
+    - "aman.joshi@acquia.com"
+    - "goutam.jaiswal@acquia.com"
+    - "navneet.verma@acquia.com"
+    - "ricardo.amaro@acquia.com"
+    - "saransh.ambarte@acquia.com"
+    - "shalin.badole@acquia.com"
+    - "shane.vanhart@acquia.com"
+    - "vishnu.chegondi@acquia.com"

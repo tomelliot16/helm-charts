@@ -1,0 +1,133 @@
+apiVersion: v1  # This informs what versions of ak8s this file is compatible with
+service: cortex
+project: cortex
+owner: devops
+base:
+  custom:
+    version: master
+    repo: https://github.com/acquia/devops-cortex
+    path: ./charts/cortex
+    values:
+      ingress:
+        class: nginx
+
+variants:
+  - name: dev
+    overrides:
+      custom:
+        version: &dev-version master
+        values:
+          image:
+            name:
+              backend: "jfrog.ais.acquia.io/devops-pipeline-dev/cortex/backend"
+              frontend: "jfrog.ais.acquia.io/devops-pipeline-dev/cortex/frontend"
+            pullPolicy: Always
+            version:
+              backend: *dev-version
+              frontend: *dev-version
+            secrets:
+              - name: artifactory-external-secret
+          issuer:
+            server: https://acme-v02.api.letsencrypt.org/directory
+          cortex_app:
+            protocol: https
+            host: app.cortex-dev.dev.cicd.acquia.io
+            backendHost: api.cortex-dev.dev.cicd.acquia.io
+          db_creds:
+           key: platform/devops/cortex_rds1
+
+  - name: qa
+    overrides:
+      custom:
+        version: &qa-version v1.4.0
+        values:
+          image:
+            name:
+              backend: "jfrog.ais.acquia.io/devops-pipeline-qa/cortex/backend"
+              frontend: "jfrog.ais.acquia.io/devops-pipeline-qa/cortex/frontend"
+            version:
+              backend: *qa-version
+              frontend: *qa-version
+            secrets:
+              - name: artifactory-external-secret
+          issuer:
+            server: https://acme-v02.api.letsencrypt.org/directory
+          cortex_app:
+            protocol: https
+            host: app.cortex-qa.dev.cicd.acquia.io
+            backendHost: api.cortex-qa.dev.cicd.acquia.io
+          db_creds:
+            key: platform/devops/cortex_rds1
+          
+  - name: staging
+    overrides:
+      custom:
+        version: &staging-version v1.4.0
+        values:
+          image:
+            name:
+              backend: "jfrog.ais.acquia.io/devops-pipeline-staging/cortex/backend"
+              frontend: "jfrog.ais.acquia.io/devops-pipeline-staging/cortex/frontend"
+            version:
+              backend: *staging-version
+              frontend: *staging-version
+            secrets:
+              - name: artifactory-external-secret
+          issuer:
+            server: https://acme-v02.api.letsencrypt.org/directory
+          cortex_app:
+            protocol: https
+            host: app.cortex-staging.cloudservices.acquia.io
+            backendHost: api.cortex-staging.cloudservices.acquia.io
+          db_creds:
+            key: platform/devops/cortex_rds1
+          ingress:
+            class: traefik
+   
+  - name: staging-nginx
+    overrides:
+      custom:
+        version: &staging-version v1.4.0
+        values:
+          image:
+            name:
+              backend: "jfrog.ais.acquia.io/devops-pipeline-staging/cortex/backend"
+              frontend: "jfrog.ais.acquia.io/devops-pipeline-staging/cortex/frontend"
+            version:
+              backend: *staging-version
+              frontend: *staging-version
+            secrets:
+              - name: artifactory-external-secret
+          issuer:
+            server: https://acme-v02.api.letsencrypt.org/directory
+          cortex_app:
+            protocol: https
+            host: app.cortex.staging.cicd.acquia.io
+            backendHost: api.cortex.staging.cicd.acquia.io
+          db_creds:
+            key: platform/devops/cortex_rds1
+
+  - name: prod
+    overrides:
+      custom:
+        version: &prod-version v1.4.0
+        values:
+          image:
+            name:
+              backend: "jfrog.ais.acquia.io/devops-pipeline-prod/cortex/backend"
+              frontend: "jfrog.ais.acquia.io/devops-pipeline-prod/cortex/frontend"
+            version:
+              backend: *prod-version
+              frontend: *prod-version
+            secrets:
+              - name: artifactory-external-secret
+          issuer:
+            server: https://acme-v02.api.letsencrypt.org/directory
+          cortex_app:
+            protocol: https
+            host: cortex.acquia.io
+            backendHost: api.cortex.cloudservices.acquia.io
+          db_creds:
+            key: platform/devops/cortex_rds2
+          ingress:
+            class: traefik
