@@ -1,0 +1,40 @@
+apiVersion: v1  # This informs what versions of ak8s this file is compatible with
+service: stormforge
+project: stormforge
+owner: devops
+base:
+  # Bootstrap
+  standard:
+    type: bootstrap
+    version: v0.6.2
+    values:
+      targetNamespace: stormforge-system
+      repoURL: https://github.com/acquia/sre-stormforge
+      targetRevision: "DO_NOT_USE"
+      path: charts/optimize-live
+
+variants:
+  - name: dev
+    overrides:
+      custom:
+        version: master
+        values:
+          component:
+            image:
+              controller:
+                repository: "jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/controller"
+                tag: 0.0.17
+              tsdb:
+                repository: "jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/tsdb"
+                tag: 0.0.10
+              applier:
+                repository: "jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/applier"
+                tag: 0.0.4
+              recommender:
+                repository: "jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/recommender"
+                tag: 0.2.7
+              grafana:
+                repository: "jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/grafana"
+                tag: 8.4.6
+
+
