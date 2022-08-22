@@ -7,6 +7,7 @@ ARG BASE_IMAGE=python:3.9-slim
 # and improving security scanning
 ARG REPO_LOCATION
 FROM ${REPO_LOCATION}${BASE_IMAGE}
+ARG K3D_VERSION=v5.0.0-rc.2
 
 RUN apt-get update && apt-get upgrade -y \
   && apt-get install -y \
@@ -17,6 +18,20 @@ RUN apt-get update && apt-get upgrade -y \
 # Installing docker
 RUN curl -fsSL https://get.docker.com -o get-docker.sh
 RUN sh get-docker.sh
+
+RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+RUN install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+# Install helm
+RUN curl https://get.helm.sh/helm-v3.6.3-linux-amd64.tar.gz | tar -xz
+RUN mv linux-amd64/helm /usr/local/bin
+
+# Install k3d
+RUN curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | TAG=${K3D_VERSION} bash
+
+#Install StormForge CLI
+RUN curl -L https://app.stormforge.io/downloads/stormforge-linux-amd64.tar.gz | tar -xz && \
+    mv stormforge /usr/local/bin/
 
 # define execution on docker run
 CMD [ "/bin/bash" ]

@@ -2,43 +2,49 @@
 type: default
 team: devops
 group: platform
-service: cortex
+service: stormforge
 # Valid groups: platform, drupal-cloud, marketing-cloud, acquia-shared
-
 
 # Validate the formatting of the pipeline.yaml file.
 validate_config: true
-
+      
 # The environment container image is used to prepare code versions
 # and tooling for tests during pre, post and build stages.
 environment_image:
   file: ".acquia/Dockerfile.ci"
   context: "."
-  cache_from: 'devops-cortex-environment'
-  build_args:
-    - secrets:
-        - type: vault
-          key: SSH_KEY
-          value: GIT_SSH_KEY
-          path: secret/pipeline-default/GIT_SSH_KEY
+  cache_from: 'sre-stormforge-environment'
 
 # -- Continuous Integration --
 # Pre-build runs after building the environment image, and relies on it to
 # run its sub-stages' steps inside of the environment container.
 pre_build:
-  cortex_docker_login:
+  static_lint:
     - steps:
-        - "Pulling Cortex docker images":
-          -  echo "${CORTEX_REGISTRY_PWD}"| docker login docker.pkg.github.com -u gsdatta  --password-stdin
-          -  docker pull docker.pkg.github.com/cortexapps/brain-backend/cortex-onprem-backend:${CORTEX_VERSION}
-          -  docker pull docker.pkg.github.com/cortexapps/brain-app/cortex-onprem-frontend:${CORTEX_VERSION}
+      - helm lint charts/optimize-live
+
+  stormforge_images:
+    - steps:
+        - Login and Pull images:
+          - |
+            echo "${JFROG_READONLY}"| docker login ${REPO_LOCATION} -u devops.readonly --password-stdin
+            echo "${STORMFORGE_REGISTRY_PWD}"| docker login registry.stormforge.io -u 'robot$optimize-live+nqcq1958xa0zfnolfa1ufca6qn22ozig' --password-stdin
+            docker pull registry.stormforge.io/optimize-live/controller:${CONTROLLER_VERSION}
+            docker pull registry.stormforge.io/optimize-live/recommender:${RECOMMENDER_VERSION}
+            docker pull registry.stormforge.io/optimize-live/applier:${APPLIER_VERSION}
+            docker pull registry.stormforge.io/optimize-live/tsdb:${TSDB_VERSION}
+            docker pull jfrog.ais.acquia.io/devops-pipeline/grafana/grafana-oss
       args: -v /var/run/docker.sock:/var/run/docker.sock --net=host
-      secrets:
+      secrets: 
         - type: vault
-          key: CORTEX_REGISTRY_PWD
-          value: CORTEX_REGISTRY_PWD
-          path: secret/devops-cortex/CORTEX_REGISTRY_PWD
-          
+          key: JFROG_READONLY
+          value: JFROG_READONLY
+          path: secret/pipeline-default/JFROG_READONLY
+        - type: vault
+          key: STORMFORGE_REGISTRY_PWD
+          value: STORMFORGE_REGISTRY_PWD
+          path: secret/sre-stormforge/STORMFORGE_REGISTRY_PWD
+              
   code_analysis: 
     required: false
 
@@ -50,53 +56,171 @@ pre_build:
 # https://github.com/acquia/devops-pipeline/blob/master/consumer/pipeline_get_started.md
 build:
   service_image:
-    - name: cortex/backend
+    - name: stormforge/controller
       file: "Dockerfile"
       context: "."
       args: ""
-      cache_from: cortex/backend
+      cache_from: stormforge/controller
       build_args:
-        - "BASE_IMAGE_REPO=docker.pkg.github.com"
-        - "BASE_IMAGE_NAME=cortexapps/brain-backend/cortex-onprem-backend"
-        - "BASE_IMAGE_TAG=${CORTEX_VERSION}"
-    - name: cortex/frontend
+        - "BASE_IMAGE_REPO=registry.stormforge.io"
+        - "BASE_IMAGE_NAME=optimize-live/controller"
+        - "BASE_IMAGE_TAG=${CONTROLLER_VERSION}"
+    - name: stormforge/recommender
       file: "Dockerfile"
       context: "."
       args: ""
-      cache_from: cortex/frontend
+      cache_from: stormforge/recommender
       build_args:
-        - "BASE_IMAGE_REPO=docker.pkg.github.com"
-        - "BASE_IMAGE_NAME=cortexapps/brain-app/cortex-onprem-frontend"
-        - "BASE_IMAGE_TAG=${CORTEX_VERSION}"
-       
+        - "BASE_IMAGE_REPO=registry.stormforge.io"
+        - "BASE_IMAGE_NAME=optimize-live/recommender"
+        - "BASE_IMAGE_TAG=${RECOMMENDER_VERSION}"
+    - name: stormforge/tsdb
+      file: "Dockerfile"
+      context: "."
+      args: ""
+      cache_from: stormforge/tsdb
+      build_args:
+        - "BASE_IMAGE_REPO=registry.stormforge.io"
+        - "BASE_IMAGE_NAME=optimize-live/tsdb"
+        - "BASE_IMAGE_TAG=${TSDB_VERSION}"
+    - name: stormforge/applier
+      file: "Dockerfile"
+      context: "."
+      args: ""
+      cache_from: stormforge/applier
+      build_args:
+        - "BASE_IMAGE_REPO=registry.stormforge.io"
+        - "BASE_IMAGE_NAME=optimize-live/applier"
+        - "BASE_IMAGE_TAG=${APPLIER_VERSION}"
+    - name: stormforge/grafana-oss
+      file: "Dockerfile"
+      context: "."
+      args: ""
+      cache_from: stormforge/grafana
+      build_args:
+        - "BASE_IMAGE_REPO=grafana"
+        - "BASE_IMAGE_NAME=grafana-oss"
+        - "BASE_IMAGE_TAG=${GRAFANA_VERSION}"
+
 # This step performs container image security scan in Jfrog Xray via Artifactory
 # Build will fail whenever a vulnerability is found unless set to true.
 security_scan:
   ignore_failures: true
 
-# -- Continuous Delivery & Deployment --
-# Cut a Release Tag automatically?
-cut_release_tag: false
-
-
-# Simply deploy to Kaas using "acd" and platform.yaml
+# Deploy to k3d for testing
 deploy:
-  - component: acd
-    require_production_approval: false    
+  - component: custom
+    require_production_approval: false
+    dev:
+    - steps:
+      - |
+        echo "Create k3d cluster"
+        echo "${JFROG_READONLY}"| docker login ${REPO_LOCATION} -u devops.readonly --password-stdin
+        docker pull ${REPO_LOCATION}library/registry:2
+        k3d registry delete --all && k3d cluster delete --all
+        k3d registry create ${SERVICE_REPO_NAME}${BUILD_NUMBER} \
+          --image ${REPO_LOCATION}library/registry:2 \
+          --port 0.0.0.0:5000 
+        k3d cluster create ${SERVICE_REPO_NAME}${BUILD_NUMBER} \
+          --registry-use k3d-${SERVICE_REPO_NAME}${BUILD_NUMBER}:5000 \
+          -p "9000:9000@loadbalancer" -p "9443:9443@loadbalancer" \
+          --k3s-arg "--no-deploy=traefik@all"
+        kubectl cluster-info
+        kubectl label nodes --all node-role.kubernetes.io/management=true
+      args: -v /var/run/docker.sock:/var/run/docker.sock --net=host
+      secrets:
+        - type: vault
+          key: ACD_DEV_TOKEN
+          value: ACD_DEV_TOKEN
+          path: secret/kaas-teleport-proxy/ACD_DEV_TOKEN
+        - type: vault
+          key: JFROG_READONLY
+          value: JFROG_READONLY
+          path: secret/pipeline-default/JFROG_READONLY
+
+# Uncomment and fix to deploy to prod clusters using ACD
+# Based on https://github.com/acquia/kaas-teleport-proxy/blob/master/.acquia/pipeline.yaml#L53
+
+    # prod:
+    # - steps:
+    #     - |
+    #       for i in 1 2 3; do
+    #       echo "${JFROG_READONLY}"| docker login ${REPO_LOCATION} -u devops.readonly --password-stdin && \
+    #       docker run -v $(pwd):/temp_dir/ \
+    #         -w /temp_dir \
+    #         jfrog.ais.acquia.io/devops-pipeline/acd:${ACD_IMAGE_VERSION} \
+    #         acd deploy \
+    #         --variant prod-sentry9cac \
+    #         --cluster-override  prod-sentry9cac \
+    #         --loglevel debug \
+    #         --auth-token ${ACD_PROD_TOKEN} \
+    #         --yes && \
+    #         ST=$? && break || ST=$? && true;
+    #       done; [ $ST -eq 0 ]
+    #   secrets:
+    #     - type: vault
+    #       key: ACD_PROD_TOKEN
+    #       value: ACD_PROD_TOKEN
+    #       path: secret/sre-stormforge/ACD_PROD_TOKEN
+    #     - type: vault
+    #       key: JFROG_READONLY
+    #       value: JFROG_READONLY
+    #       path: secret/pipeline-default/JFROG_READONLY
+      
+post_build:
+  dev:
+    some_tests_in_dev:
+    - steps:
+      - |
+        export KUBECONFIG=$(k3d kubeconfig write ${SERVICE_REPO_NAME}${BUILD_NUMBER})
+        echo "Logging into StormForge CLI"
+        stormforge login --url
+        echo "Logged into StormForge CLI"
+
+        echo "Installing kube-prometheus-stack"
+        helm install prometheus-k8s kube-prometheus-stack \
+          --wait \
+          --namespace monitoring \
+          --create-namespace \
+          --repo https://prometheus-community.github.io/helm-charts \
+          --set alertmanager.enabled=false \
+          --set coreDns.enabled=false
+        echo "kube-prometheus-stack installed"
+
+        echo "Installing StormForge Optimize-Live"
+        stormforge generate secret -o helm --name optimize-live > stormforge-secrets
+        helm install optimize-live ./charts/optimize-live \
+          --wait \
+          --atomic \
+          --namespace stormforge-system \
+          --create-namespace \
+          --set metricsURL=http://prometheus-k8s-kube-promet-prometheus.monitoring.svc:9090 \
+          -f stormforge-secrets
+        echo "Optimize-Live installed"
+        # see examples at https://github.com/acquia/nginx-ingress-controller/blob/main/.acquia/pipeline.yaml#L111
+      args: -v /var/run/docker.sock:/var/run/docker.sock --net=host
+
+after_failure:
+  - steps:
+      - |
+        echo "DEBUGGING logs and CLEANUP after failure"
+        docker logs --tail 50 k3d-${SERVICE_REPO_NAME}${BUILD_NUMBER}-server-0
+        k3d cluster delete ${SERVICE_REPO_NAME}${BUILD_NUMBER} || true
+    args: -v /var/run/docker.sock:/var/run/docker.sock --net=host
+
+after_success:
+  - steps:
+      - k3d cluster delete ${SERVICE_REPO_NAME}${BUILD_NUMBER}
+    args: -v /var/run/docker.sock:/var/run/docker.sock --net=host
+      
+#  qa:
+#    tests_in_qa:
+#    - steps:
+#      - |
+#        echo "add tests in qa"
 
 # -- Slack Bot Integration --
 notify:
   channel: test-jenkins-notifications
   on_success: change
   on_failure: always
-    
-  approvers:
-    - "abhishek.ratnawat@acquia.com"
-    - "aman.joshi@acquia.com"
-    - "goutam.jaiswal@acquia.com"
-    - "navneet.verma@acquia.com"
-    - "ricardo.amaro@acquia.com"
-    - "saransh.ambarte@acquia.com"
-    - "shalin.badole@acquia.com"
-    - "shane.vanhart@acquia.com"
-    - "vishnu.chegondi@acquia.com"

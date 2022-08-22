@@ -1,133 +1,40 @@
 apiVersion: v1  # This informs what versions of ak8s this file is compatible with
-service: cortex
-project: cortex
+service: stormforge
+project: stormforge
 owner: devops
 base:
-  custom:
-    version: master
-    repo: https://github.com/acquia/devops-cortex
-    path: ./charts/cortex
+  # Bootstrap
+  standard:
+    type: bootstrap
+    version: v0.6.2
     values:
-      ingress:
-        class: nginx
+      targetNamespace: stormforge-system
+      repoURL: https://github.com/acquia/sre-stormforge
+      targetRevision: "DO_NOT_USE"
+      path: charts/optimize-live
 
 variants:
   - name: dev
     overrides:
       custom:
-        version: &dev-version master
+        version: master
         values:
-          image:
-            name:
-              backend: "jfrog.ais.acquia.io/devops-pipeline-dev/cortex/backend"
-              frontend: "jfrog.ais.acquia.io/devops-pipeline-dev/cortex/frontend"
-            pullPolicy: Always
-            version:
-              backend: *dev-version
-              frontend: *dev-version
-            secrets:
-              - name: artifactory-external-secret
-          issuer:
-            server: https://acme-v02.api.letsencrypt.org/directory
-          cortex_app:
-            protocol: https
-            host: app.cortex-dev.dev.cicd.acquia.io
-            backendHost: api.cortex-dev.dev.cicd.acquia.io
-          db_creds:
-           key: platform/devops/cortex_rds1
+          component:
+            image:
+              controller:
+                repository: "jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/controller"
+                tag: 0.0.17
+              tsdb:
+                repository: "jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/tsdb"
+                tag: 0.0.10
+              applier:
+                repository: "jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/applier"
+                tag: 0.0.4
+              recommender:
+                repository: "jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/recommender"
+                tag: 0.2.7
+              grafana:
+                repository: "jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/grafana"
+                tag: 8.4.6
 
-  - name: qa
-    overrides:
-      custom:
-        version: &qa-version v1.4.0
-        values:
-          image:
-            name:
-              backend: "jfrog.ais.acquia.io/devops-pipeline-qa/cortex/backend"
-              frontend: "jfrog.ais.acquia.io/devops-pipeline-qa/cortex/frontend"
-            version:
-              backend: *qa-version
-              frontend: *qa-version
-            secrets:
-              - name: artifactory-external-secret
-          issuer:
-            server: https://acme-v02.api.letsencrypt.org/directory
-          cortex_app:
-            protocol: https
-            host: app.cortex-qa.dev.cicd.acquia.io
-            backendHost: api.cortex-qa.dev.cicd.acquia.io
-          db_creds:
-            key: platform/devops/cortex_rds1
-          
-  - name: staging
-    overrides:
-      custom:
-        version: &staging-version v1.4.0
-        values:
-          image:
-            name:
-              backend: "jfrog.ais.acquia.io/devops-pipeline-staging/cortex/backend"
-              frontend: "jfrog.ais.acquia.io/devops-pipeline-staging/cortex/frontend"
-            version:
-              backend: *staging-version
-              frontend: *staging-version
-            secrets:
-              - name: artifactory-external-secret
-          issuer:
-            server: https://acme-v02.api.letsencrypt.org/directory
-          cortex_app:
-            protocol: https
-            host: app.cortex-staging.cloudservices.acquia.io
-            backendHost: api.cortex-staging.cloudservices.acquia.io
-          db_creds:
-            key: platform/devops/cortex_rds1
-          ingress:
-            class: traefik
-   
-  - name: staging-nginx
-    overrides:
-      custom:
-        version: &staging-version v1.4.0
-        values:
-          image:
-            name:
-              backend: "jfrog.ais.acquia.io/devops-pipeline-staging/cortex/backend"
-              frontend: "jfrog.ais.acquia.io/devops-pipeline-staging/cortex/frontend"
-            version:
-              backend: *staging-version
-              frontend: *staging-version
-            secrets:
-              - name: artifactory-external-secret
-          issuer:
-            server: https://acme-v02.api.letsencrypt.org/directory
-          cortex_app:
-            protocol: https
-            host: app.cortex.staging.cicd.acquia.io
-            backendHost: api.cortex.staging.cicd.acquia.io
-          db_creds:
-            key: platform/devops/cortex_rds1
 
-  - name: prod
-    overrides:
-      custom:
-        version: &prod-version v1.4.0
-        values:
-          image:
-            name:
-              backend: "jfrog.ais.acquia.io/devops-pipeline-prod/cortex/backend"
-              frontend: "jfrog.ais.acquia.io/devops-pipeline-prod/cortex/frontend"
-            version:
-              backend: *prod-version
-              frontend: *prod-version
-            secrets:
-              - name: artifactory-external-secret
-          issuer:
-            server: https://acme-v02.api.letsencrypt.org/directory
-          cortex_app:
-            protocol: https
-            host: cortex.acquia.io
-            backendHost: api.cortex.cloudservices.acquia.io
-          db_creds:
-            key: platform/devops/cortex_rds2
-          ingress:
-            class: traefik
