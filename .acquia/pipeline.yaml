@@ -44,7 +44,65 @@ pre_build:
           key: STORMFORGE_REGISTRY_PWD
           value: STORMFORGE_REGISTRY_PWD
           path: secret/sre-stormforge/STORMFORGE_REGISTRY_PWD
-              
+
+  # after:
+    # k3d_testing:
+    #   - steps:
+    #     - |
+    #       echo "Create k3d cluster"
+    #       echo "${JFROG_READONLY}"| docker login ${REPO_LOCATION} -u devops.readonly --password-stdin
+    #       docker pull ${REPO_LOCATION}library/registry:2
+    #       k3d registry delete --all && k3d cluster delete --all
+    #       k3d registry create ${SERVICE_REPO_NAME}${BUILD_NUMBER} \
+    #         --image ${REPO_LOCATION}library/registry:2 \
+    #         --port 0.0.0.0:5000 
+    #       k3d cluster create ${SERVICE_REPO_NAME}${BUILD_NUMBER} \
+    #         --registry-use k3d-${SERVICE_REPO_NAME}${BUILD_NUMBER}:5000 \
+    #         -p "9000:9000@loadbalancer" -p "9443:9443@loadbalancer" \
+    #         --k3s-arg "--no-deploy=traefik@all"
+
+    #       kubectl cluster-info
+    #       kubectl label nodes --all node-role.kubernetes.io/management=true
+        
+    #       export KUBECONFIG=$(k3d kubeconfig write ${SERVICE_REPO_NAME}${BUILD_NUMBER})
+
+    #       echo "Installing kube-prometheus-stack"
+    #       helm install prometheus-k8s kube-prometheus-stack \
+    #         --wait \
+    #         --namespace monitoring \
+    #         --create-namespace \
+    #         --repo https://prometheus-community.github.io/helm-charts \
+    #         --set alertmanager.enabled=false \
+    #         --set coreDns.enabled=false
+    #       echo "kube-prometheus-stack installed"
+
+    #       echo "Creating StormForge Values File"
+    #       tee -a values.yaml <<EOF
+    #       authorization:
+    #         clientID: I2Cighop2bgYvyNYgk98SsuAr7qe893n
+    #         clientSecret: ${STORMFORGE_AUTH_SECRET}
+    #       EOF
+    #       echo "Installing StormForge Optimize-Live"
+    #       helm install optimize-live ./charts/optimize-live \
+    #         --wait \
+    #         --atomic \
+    #         --namespace stormforge-system \
+    #         --create-namespace \
+    #         --set metricsURL=http://prometheus-k8s-kube-promet-prometheus.monitoring.svc:9090 \
+    #         -f values.yaml
+    #       echo "Optimize-Live installed"
+    #       # see examples at https://github.com/acquia/nginx-ingress-controller/blob/main/.acquia/pipeline.yaml#L111
+    #     args: -v /var/run/docker.sock:/var/run/docker.sock --net=host
+    #     secrets: 
+    #       - type: vault
+    #         key: JFROG_READONLY
+    #         value: JFROG_READONLY
+    #         path: secret/pipeline-default/JFROG_READONLY
+    #       - type: vault
+    #         key: STORMFORGE_AUTH_SECRET
+    #         value: STORMFORGE_AUTH_SECRET
+    #         path: secret/sre-stormforge/STORMFORGE_AUTH_SECRET
+
   code_analysis: 
     required: false
 
@@ -107,117 +165,9 @@ build:
 security_scan:
   ignore_failures: true
 
-# Deploy to k3d for testing
 deploy:
-  - component: custom
+  - component: acd
     require_production_approval: false
-    dev:
-    - steps:
-      - |
-        echo "Create k3d cluster"
-        echo "${JFROG_READONLY}"| docker login ${REPO_LOCATION} -u devops.readonly --password-stdin
-        docker pull ${REPO_LOCATION}library/registry:2
-        k3d registry delete --all && k3d cluster delete --all
-        k3d registry create ${SERVICE_REPO_NAME}${BUILD_NUMBER} \
-          --image ${REPO_LOCATION}library/registry:2 \
-          --port 0.0.0.0:5000 
-        k3d cluster create ${SERVICE_REPO_NAME}${BUILD_NUMBER} \
-          --registry-use k3d-${SERVICE_REPO_NAME}${BUILD_NUMBER}:5000 \
-          -p "9000:9000@loadbalancer" -p "9443:9443@loadbalancer" \
-          --k3s-arg "--no-deploy=traefik@all"
-        kubectl cluster-info
-        kubectl label nodes --all node-role.kubernetes.io/management=true
-      args: -v /var/run/docker.sock:/var/run/docker.sock --net=host
-      secrets:
-        - type: vault
-          key: ACD_DEV_TOKEN
-          value: ACD_DEV_TOKEN
-          path: secret/kaas-teleport-proxy/ACD_DEV_TOKEN
-        - type: vault
-          key: JFROG_READONLY
-          value: JFROG_READONLY
-          path: secret/pipeline-default/JFROG_READONLY
-
-# Uncomment and fix to deploy to prod clusters using ACD
-# Based on https://github.com/acquia/kaas-teleport-proxy/blob/master/.acquia/pipeline.yaml#L53
-
-    # prod:
-    # - steps:
-    #     - |
-    #       for i in 1 2 3; do
-    #       echo "${JFROG_READONLY}"| docker login ${REPO_LOCATION} -u devops.readonly --password-stdin && \
-    #       docker run -v $(pwd):/temp_dir/ \
-    #         -w /temp_dir \
-    #         jfrog.ais.acquia.io/devops-pipeline/acd:${ACD_IMAGE_VERSION} \
-    #         acd deploy \
-    #         --variant prod-sentry9cac \
-    #         --cluster-override  prod-sentry9cac \
-    #         --loglevel debug \
-    #         --auth-token ${ACD_PROD_TOKEN} \
-    #         --yes && \
-    #         ST=$? && break || ST=$? && true;
-    #       done; [ $ST -eq 0 ]
-    #   secrets:
-    #     - type: vault
-    #       key: ACD_PROD_TOKEN
-    #       value: ACD_PROD_TOKEN
-    #       path: secret/sre-stormforge/ACD_PROD_TOKEN
-    #     - type: vault
-    #       key: JFROG_READONLY
-    #       value: JFROG_READONLY
-    #       path: secret/pipeline-default/JFROG_READONLY
-      
-post_build:
-  dev:
-    some_tests_in_dev:
-    - steps:
-      - |
-        export KUBECONFIG=$(k3d kubeconfig write ${SERVICE_REPO_NAME}${BUILD_NUMBER})
-        echo "Logging into StormForge CLI"
-        stormforge login --url
-        echo "Logged into StormForge CLI"
-
-        echo "Installing kube-prometheus-stack"
-        helm install prometheus-k8s kube-prometheus-stack \
-          --wait \
-          --namespace monitoring \
-          --create-namespace \
-          --repo https://prometheus-community.github.io/helm-charts \
-          --set alertmanager.enabled=false \
-          --set coreDns.enabled=false
-        echo "kube-prometheus-stack installed"
-
-        echo "Installing StormForge Optimize-Live"
-        stormforge generate secret -o helm --name optimize-live > stormforge-secrets
-        helm install optimize-live ./charts/optimize-live \
-          --wait \
-          --atomic \
-          --namespace stormforge-system \
-          --create-namespace \
-          --set metricsURL=http://prometheus-k8s-kube-promet-prometheus.monitoring.svc:9090 \
-          -f stormforge-secrets
-        echo "Optimize-Live installed"
-        # see examples at https://github.com/acquia/nginx-ingress-controller/blob/main/.acquia/pipeline.yaml#L111
-      args: -v /var/run/docker.sock:/var/run/docker.sock --net=host
-
-after_failure:
-  - steps:
-      - |
-        echo "DEBUGGING logs and CLEANUP after failure"
-        docker logs --tail 50 k3d-${SERVICE_REPO_NAME}${BUILD_NUMBER}-server-0
-        k3d cluster delete ${SERVICE_REPO_NAME}${BUILD_NUMBER} || true
-    args: -v /var/run/docker.sock:/var/run/docker.sock --net=host
-
-after_success:
-  - steps:
-      - k3d cluster delete ${SERVICE_REPO_NAME}${BUILD_NUMBER}
-    args: -v /var/run/docker.sock:/var/run/docker.sock --net=host
-      
-#  qa:
-#    tests_in_qa:
-#    - steps:
-#      - |
-#        echo "add tests in qa"
 
 # -- Slack Bot Integration --
 notify:

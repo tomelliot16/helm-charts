@@ -1,0 +1,121 @@
+# Default values for optimize-live.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+component:
+  image:
+    controller:
+      repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/controller
+      pullPolicy: IfNotPresent
+      tag: v1.0.0
+    tsdb:
+      repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/tsdb
+      pullPolicy: IfNotPresent
+      tag: v1.0.0
+    applier:
+      repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/applier
+      pullPolicy: IfNotPresent
+      tag: v1.0.0
+    recommender:
+      repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/recommender
+      pullPolicy: IfNotPresent
+      tag: v1.0.0
+    grafana:
+      repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/grafana-oss
+      pullPolicy: IfNotPresent
+      tag: v1.0.0
+
+imagePullSecrets: artifactory-external-secret
+nameOverride: ""
+fullnameOverride: ""
+defaultNamespace: stormforge-system
+createNamespace: true
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+rbac:
+  clusterRole:
+    create: true
+    name: ""
+  clusterRoleBinding:
+    create: true
+    name: ""
+
+imageCredentials:
+  registry: registry.stormforge.io
+  username: username
+  password: password
+
+stormforge:
+  address: https://api.stormforge.io/
+
+authorization:
+  issuer: https://api.stormforge.io/
+  clientID: id
+  clientSecret: secret
+
+# metricsURL should be used to set the URL of the prometheus server
+# that should be scraped to fetch metrics.
+# When using DataDog or another external metrics provider, this field
+# should be left at the default ""
+metricsURL: http://kube-prometheus-stack-prometheus.kaas-monitoring.svc.cluster.local:9090
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext:
+  runAsNonRoot: true
+
+# extraEnvVars can be used to set things like:
+# HTTP_PROXY/HTTPS_PROXY/NO_PROXY
+# DD_API_KEY/DD_APP_KEY/DD_SITE
+# This can also be set through the stormforge cli via
+# `stormforge config set controller.<environment>.env.HTTP_PROXY http://my.proxy.example`
+extraEnvVars: []
+
+resources: {}
+  # limits:
+  #   cpu: 500m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 10m
+  #   memory: 64Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: 8081
+  initialDelaySeconds: 15
+  periodSeconds: 20
+
+readinessProbe:
+  httpGet:
+    path: /readyz
+    port: 8081
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+# Override the default storage class for pv creation
+# It is strongly encouraged to use `xfs` as the backing filesystem
+# to avoid inode exhaustion.
+storageClass: ""
+
+ # pvcSize dictates how large of a PVC should be requested.
+ # This defaults to 10G
+pvcSize: ""
