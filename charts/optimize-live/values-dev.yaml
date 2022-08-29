@@ -30,7 +30,7 @@ component:
 imagePullSecrets: artifactory-external-secret
 nameOverride: ""
 fullnameOverride: ""
-defaultNamespace: stormforge-system
+defaultNamespace: stormforge-dev
 createNamespace: true
 
 serviceAccount:
