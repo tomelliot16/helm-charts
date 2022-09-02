@@ -8,6 +8,10 @@ base:
     type: bootstrap
     version: v0.7.4
     values:
+      syncPolicy:
+        automated:
+          prune: true
+          allowEmpty: true
       clusterTypes:
         - "internal"
         - "polaris"
@@ -23,11 +27,8 @@ variants:
           valueFiles:
             - values-dev.yaml
           targetRevision: "main"
-  
-  - name: qa
-    overrides:
-      standard:
-        values:
-          valueFiles:
-            - values-qa.yaml
-          targetRevision: "v1.0.0"
+          # clusterOverrides:
+          #   - selectorLabels:
+          #     - key: name
+          #       value: some-testing-cluster
+          #     targetRevision: DEVOPS-XXXX

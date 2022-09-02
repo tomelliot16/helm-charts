@@ -27,10 +27,10 @@ component:
       pullPolicy: IfNotPresent
       tag: latest
 
-imagePullSecrets: artifactory-external-secret
+imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
-defaultNamespace: stormforge-dev
+defaultNamespace: stormforge-system
 createNamespace: true
 
 serviceAccount:
