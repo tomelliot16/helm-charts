@@ -30,5 +30,5 @@ variants:
           # clusterOverrides:
           #   - selectorLabels:
           #     - key: name
-          #       value: some-testing-cluster
-          #     targetRevision: DEVOPS-XXXX
+          #       value: csd-electro036
+          #     targetRevision: DEVOPS-2227

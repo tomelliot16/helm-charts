@@ -34,6 +34,10 @@ spec:
           envFrom:
           - secretRef:
               name: {{ include "optimize-live.fullname" . }}
+{{- if .Values.debug }}
+          args:
+          - --zap-log-level=9
+{{- end }}
           env:
           - name: IMAGE_PULL_SECRET_NAME
             value: {{ include "optimize-live.fullname" . }}-docker
@@ -56,6 +60,10 @@ spec:
           - name: TSDB_PVC_SIZE
             value: {{ .Values.pvcSize }}
 {{- end }}
+{{- end }}
+{{- if .Values.debug }}
+          - name: DEBUG
+            value: "debug"
 {{- end }}
           - name: COMPONENT_TSDB_IMAGE
             value: {{ .Values.component.image.tsdb.repository }}:{{ .Values.component.image.tsdb.tag }}
