@@ -9,6 +9,16 @@ spec:
         - namespaceSelector:
             matchLabels:
               name: {{ .Values.defaultNamespace }}
+        - namespaceSelector:
+            matchExpressions:
+            - key: "name"
+              operator: "In"
+              values:
+              - kaas-metrics
+              - kaas-monitoring
+          podSelector:
+            matchLabels:
+              app: prometheus
       ports:
         - port: 8080
           protocol: TCP

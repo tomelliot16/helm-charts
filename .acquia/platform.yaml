@@ -30,5 +30,5 @@ variants:
           # clusterOverrides:
           #   - selectorLabels:
           #     - key: name
-          #       value: csd-electro036
-          #     targetRevision: DEVOPS-2227
+          #       value: ngc-2-lemuraa998
+          #     targetRevision: DEVOPS-2251

@@ -1,0 +1,14 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    k8c.collection.enabled: "true"
+  name: stormforge-metrics-monitor
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpoints:
+    - path: /recommendations
+      targetPort: 8080
+  selector:
+    matchLabels:
+      component: tsdb
