@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    argocd.argoproj.io/sync-wave: "1"
+    helm.sh/hook: test
+  name: stormforge-tests
+  namespace: stormforge-system
+spec:
+  entrypoint: all
+  podGC:
+    strategy: OnPodSuccess
+  serviceAccountName: stormforge-tests
+  templates:
+  - name: all
+    steps:
+    - - name: delete-deployment
+        templateRef:
+          name: utils
+          template: delete-deployment
+    - - name: cpu-deployment
+        templateRef:
+          name: cpu-deployment
+          template: create-deployment
+    - - name: optimize-live
+        templateRef:
+          name: optimize-live
+          template: check-apply
+      
