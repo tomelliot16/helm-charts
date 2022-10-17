@@ -167,7 +167,19 @@ security_scan:
 
 deploy:
   - component: acd
-    require_production_approval: false
+    require_production_approval: false    
+    dev:
+      check_health: true
+      timeout: 5
+    qa:
+      check_health: true
+      timeout: 5
+    staging:
+      check_health: true
+      timeout: 5
+    prod:
+      check_health: true
+      timeout: 5
 
 # -- Slack Bot Integration --
 notify:
