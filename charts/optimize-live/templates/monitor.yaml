@@ -3,9 +3,11 @@ kind: ServiceMonitor
 metadata:
   labels:
     k8c.collection.enabled: "true"
-  name: stormforge-metrics-monitor
+  name: scrape-tsdb-pods
   namespace: {{ .Release.Namespace }}
 spec:
+  namespaceSelector:
+    any: true
   endpoints:
     - path: /recommendations
       targetPort: 8080
