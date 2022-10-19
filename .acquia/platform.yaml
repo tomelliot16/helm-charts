@@ -27,11 +27,11 @@ variants:
           valueFiles:
             - values-dev.yaml
           targetRevision: "main"
-          clusterOverrides:
-            - selectorLabels:
-              - key: name
-                value: ngcweb-loki1c6bb4
-              targetRevision: integration-tests
+          # clusterOverrides:
+          #   - selectorLabels:
+          #     - key: name
+          #       value: ngcweb-loki1c6bb4
+          #     targetRevision: integration-tests
 
   - name: staging
     overrides:
