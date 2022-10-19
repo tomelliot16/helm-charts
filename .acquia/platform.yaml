@@ -26,7 +26,7 @@ variants:
         values:
           valueFiles:
             - values.yaml
-          targetRevision: &dev-version DEVOPS-2409
+          targetRevision: &dev-version main
           component:
             image:
               controller:
