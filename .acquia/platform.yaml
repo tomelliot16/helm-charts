@@ -56,7 +56,7 @@ variants:
         values:
           valueFiles:
             - values.yaml
-          targetRevision: &staging-version v1.1.1
+          targetRevision: &staging-version v1.1.2
           component:
             image:
               controller:
