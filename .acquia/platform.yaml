@@ -26,13 +26,30 @@ variants:
         values:
           valueFiles:
             - values-dev.yaml
-          targetRevision: "main"
+          targetRevision: &dev-version main
+          component:
+            image:
+              controller:
+                repository: jfrog.ais.acquia.io/devops-pipeline-staging/stormforge/controller
+                tag: *dev-version
+              tsdb:
+                repository: jfrog.ais.acquia.io/devops-pipeline-staging/stormforge/tsdb
+                pullPolicy: Always
+                tag: *dev-version
+              applier:
+                repository: jfrog.ais.acquia.io/devops-pipeline-staging/stormforge/applier
+                tag: *dev-version
+              recommender:
+                repository: jfrog.ais.acquia.io/devops-pipeline-staging/stormforge/recommender
+                tag: *dev-version
+              grafana:
+                repository: jfrog.ais.acquia.io/devops-pipeline-staging/stormforge/grafana-oss
+                tag: *dev-version
           # clusterOverrides:
           #   - selectorLabels:
           #     - key: name
           #       value: ngcweb-loki1c6bb4
           #     targetRevision: integration-tests
-
   - name: staging
     overrides:
       standard:
