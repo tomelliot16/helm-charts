@@ -50,7 +50,7 @@ variants:
           # clusterOverrides:
           #   - selectorLabels:
           #     - key: name
-          #       value: ngcweb-tests-ogre3ff8d9
+          #       value: csd-hades82db9
           #     targetRevision: MY-PR-BRANCH
           #
           #-- Avoid electro, loki, or uguisud in PRs --#
