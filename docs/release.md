@@ -29,18 +29,17 @@ All changes should be made in a branch and presented to the team for review and 
    GRAFANA_VERSION=9.2.1
    ```
 
-3. Update the branch name for the `dev` section in `.acquia/platform.yaml`: 
+3. Uncomment the `clusterOverrides` section for `dev` with your PR branch name in `.acquia/platform.yaml`:
 
    ```yaml
-   variants:
-    - name: dev
-      overrides:
-        standard:
-          values:
-            valueFiles:
-              - values.yaml
-            targetRevision: &dev-version DEVOPS-???
+          clusterOverrides:
+            - selectorLabels:
+              - key: name
+                value: ngcweb-tests-ogre3ff8d9
+              targetRevision: MY-PR-BRANCH
    ```
+   
+   Do not use clusters: electro, loki, or uguisud in pull requests.
    
 4. Commit the above changes to the remote repository and monitor the [jenkins job](https://core.cloudbees.ais.acquia.io/devops-pipeline-2-jenkins/job/DEVOPS-sre-stormforge-PIPELINE)
    that runs for this branch. Make sure from the console logs in this job that the new stormforge image
