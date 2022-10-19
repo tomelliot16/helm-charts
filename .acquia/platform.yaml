@@ -45,12 +45,14 @@ variants:
               grafana:
                 repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/grafana-oss
                 tag: *dev-version
-          #------ Uncomment if deploying in a PR ------#
+          #--- Uncomment section if testing in a PR ---#
+          #
           # clusterOverrides:
           #   - selectorLabels:
           #     - key: name
           #       value: ngcweb-tests-ogre3ff8d9
           #     targetRevision: MY-PR-BRANCH
+          #
           #-- Avoid electro, loki, or uguisud in PRs --#
 
 - name: qa
