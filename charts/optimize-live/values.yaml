@@ -7,29 +7,29 @@ replicaCount: 1
 component:
   image:
     controller:
-      repository: registry.stormforge.io/optimize-live/controller
-      pullPolicy: IfNotPresent
-      tag: 0.0.20
+      repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/controller
+      pullPolicy: Always
+      tag: main
     tsdb:
-      repository: registry.stormforge.io/optimize-live/tsdb
-      pullPolicy: IfNotPresent
-      tag: 0.0.13
+      repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/tsdb
+      pullPolicy: Always
+      tag: main
     applier:
-      repository: registry.stormforge.io/optimize-live/applier
-      pullPolicy: IfNotPresent
-      tag: 0.0.7
+      repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/applier
+      pullPolicy: Always
+      tag: main
     recommender:
-      repository: registry.stormforge.io/optimize-live/recommender
-      pullPolicy: IfNotPresent
-      tag: 0.3.3
+      repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/recommender
+      pullPolicy: Always
+      tag: main
     grafana:
-      repository: grafana/grafana-oss
-      pullPolicy: IfNotPresent
-      tag: 9.1.5
+      repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/grafana-oss
+      pullPolicy: Always
+      tag: main
+
   resources:
-    # Applications with a large number of autoscaling targets may require increased requests
-    # If needing to unset resources, you can use "cpu: null" or "memory: null" in overrides when installing
-    # These resource values most suit a 500-target setup
+      # Applications with a large number of autoscaling targets may require increased requests
+      # If needing to unset resources, you can use "cpu: null" or "memory: null" in overrides when installing
     controller:
       limits:
         cpu: 250m
@@ -64,6 +64,7 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 defaultNamespace: stormforge-system
+createNamespace: true
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -78,42 +79,42 @@ rbac:
   clusterRole:
     create: true
     name: ""
-
   clusterRoleBinding:
     create: true
     name: ""
 
-  # additional can be used to extend the permissions of the service account used for patching resources
-  # additional: |-
-  #   - apiGroups:
-  #     - optimize.stormforge.io
-  #     resources:
-  #     - lives/status
-  #     verbs:
-  #     - get
-  #     - list
-  #     - patch
-  #     - update
-  #     - watch
+# additional can be used to extend the permissions of the service account used for patching resources
+  additional: |-
+   - apiGroups:
+     - fnresources.acquia.io
+     resources:
+     - drupalenvironments
+     - memcachedpools
+     verbs:
+     - get
+     - list
+     - patch
+     - update
+     - watch
 
 imageCredentials:
   registry: registry.stormforge.io
-  username: ""
-  password: ""
+  username: username
+  password: password
 
 stormforge:
   address: https://api.stormforge.io/
 
 authorization:
   issuer: https://api.stormforge.io/
-  clientID: ""
-  clientSecret: ""
+  clientID: id
+  clientSecret: secret
 
 # metricsURL should be used to set the URL of the prometheus server
 # that should be scraped to fetch metrics.
 # When using DataDog or another external metrics provider, this field
 # should be left at the default ""
-metricsURL: ""
+metricsURL: http://kube-prometheus-stack-prometheus.kaas-monitoring.svc.cluster.local:9090
 
 podAnnotations: {}
 
@@ -167,3 +168,6 @@ storageClass: ""
 pvcSize: ""
 
 debug: false
+
+# Debug mode OFF
+# debug: false

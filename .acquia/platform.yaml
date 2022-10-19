@@ -25,8 +25,8 @@ variants:
       standard:
         values:
           valueFiles:
-            - values-dev.yaml
-          targetRevision: &dev-version main
+            - values.yaml
+          targetRevision: &dev-version DEVOPS-2409
           component:
             image:
               controller:
@@ -55,7 +55,7 @@ variants:
       standard:
         values:
           valueFiles:
-            - values-staging.yaml
+            - values.yaml
           targetRevision: &staging-version v1.1.1
           component:
             image:
