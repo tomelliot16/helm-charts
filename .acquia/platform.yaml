@@ -55,7 +55,7 @@ variants:
           #
           #-- Avoid electro, loki, or uguisud in PRs --#
 
-- name: qa
+  - name: qa
     overrides:
       standard:
         values:
@@ -81,7 +81,7 @@ variants:
                 repository: jfrog.ais.acquia.io/devops-pipeline-qa/stormforge/grafana-oss
                 tag: *qa-version
 
-- name: staging
+  - name: staging
     overrides:
       standard:
         values:
