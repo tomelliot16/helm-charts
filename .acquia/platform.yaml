@@ -39,4 +39,22 @@ variants:
         values:
           valueFiles:
             - values-staging.yaml
-          targetRevision: v1.0.0
+          targetRevision: &staging-version v1.1.0
+          component:
+            image:
+              controller:
+                repository: jfrog.ais.acquia.io/devops-pipeline-staging/stormforge/controller
+                tag: *staging-version
+              tsdb:
+                repository: jfrog.ais.acquia.io/devops-pipeline-staging/stormforge/tsdb
+                pullPolicy: Always
+                tag: *staging-version
+              applier:
+                repository: jfrog.ais.acquia.io/devops-pipeline-staging/stormforge/applier
+                tag: *staging-version
+              recommender:
+                repository: jfrog.ais.acquia.io/devops-pipeline-staging/stormforge/recommender
+                tag: *staging-version
+              grafana:
+                repository: jfrog.ais.acquia.io/devops-pipeline-staging/stormforge/grafana-oss
+                tag: *staging-version
