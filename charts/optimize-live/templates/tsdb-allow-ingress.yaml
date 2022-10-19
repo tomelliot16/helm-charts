@@ -42,5 +42,16 @@ spec:
       source:
         selector: component == 'grafana'
         namespaceSelector: name=='stormforge-system'
+    - action: Allow
+      destination:
+        ports:
+        - 8080
+      metadata:
+        annotations:
+          from: recommender
+          to: tsdb
+      protocol: TCP
+      source:
+        selector: component == 'recommender'
   egress:
     - action: Allow
