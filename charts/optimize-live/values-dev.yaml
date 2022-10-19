@@ -9,23 +9,55 @@ component:
     controller:
       repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/controller
       pullPolicy: Always
-      tag: main
+      tag: integration-tests
     tsdb:
       repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/tsdb
       pullPolicy: Always
-      tag: main
+      tag: integration-tests
     applier:
       repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/applier
       pullPolicy: Always
-      tag: main
+      tag: integration-tests
     recommender:
       repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/recommender
       pullPolicy: Always
-      tag: main
+      tag: integration-tests
     grafana:
       repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/grafana-oss
       pullPolicy: Always
-      tag: main
+      tag: integration-tests
+  resources:
+      # Applications with a large number of autoscaling targets may require increased requests
+      # If needing to unset resources, you can use "cpu: null" or "memory: null" in overrides when installing
+    controller:
+      limits:
+        cpu: 250m
+        memory: 500Mi
+      requests:
+        cpu: 150m
+        memory: 150Mi
+    tsdb:
+      limits:
+        cpu: 2500m    # CPU peaks during backlog filling
+        memory: 1000Mi
+      requests:
+        cpu: 150m
+        memory: 150Mi
+    applier:
+      limits:
+        cpu: 200m
+        memory: 200Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+    recommender:
+      limits:
+        cpu: 2000m
+        memory: 2Gi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+    grafana: {}
 
 imagePullSecrets: []
 nameOverride: ""
@@ -49,6 +81,20 @@ rbac:
   clusterRoleBinding:
     create: true
     name: ""
+
+# additional can be used to extend the permissions of the service account used for patching resources
+  additional: |-
+   - apiGroups:
+     - fnresources.acquia.io
+     resources:
+     - drupalenvironments
+     - memcachedpools
+     verbs:
+     - get
+     - list
+     - patch
+     - update
+     - watch
 
 imageCredentials:
   registry: registry.stormforge.io
@@ -119,3 +165,5 @@ storageClass: ""
  # pvcSize dictates how large of a PVC should be requested.
  # This defaults to 10G
 pvcSize: ""
+
+debug: true

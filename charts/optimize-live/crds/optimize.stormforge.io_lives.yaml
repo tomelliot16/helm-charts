@@ -44,6 +44,13 @@ spec:
                   appName:
                     description: Friendly Name
                     type: string
+                  mode:
+                    description: Mode controls how the recommendations should be applied
+                    enum:
+                    - disabled
+                    - manual
+                    - auto
+                    type: string
                   namespaceSelector:
                     description: Namespaces to look for resources in
                     properties:
@@ -548,8 +555,9 @@ spec:
                               type: object
                           type: object
                         interval:
-                          description: UpdateInterval specifies how frequently recommendations
-                            should be applied.
+                          description: Interval specifies how frequently recommendations
+                            should be applied. It is equivalent to the field "Frequency"
+                            of the Optimize Live UI.
                           type: string
                         tolerance:
                           description: Tolerance only applies for ContainerResources,
@@ -584,16 +592,16 @@ spec:
                               type: string
                           type: object
                         updateInterval:
-                          description: Deprecated, use `UpdateInterval` instead.
+                          description: Deprecated, use `Interval` instead.
                           type: string
                       required:
                       - interval
-                      - updateInterval
                       type: object
                     type: array
                 required:
                 - appID
                 - appName
+                - mode
                 - namespaceSelector
                 - resources
                 type: object

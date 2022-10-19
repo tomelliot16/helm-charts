@@ -1,29 +1,46 @@
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkPolicy
 metadata:
-  name: tsdb-allow-ingress
+  name: allow-kaas-monitoring-to-tsdb
   namespace: {{ .Values.defaultNamespace }}
 spec:
-  ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              name: {{ .Values.defaultNamespace }}
-        - namespaceSelector:
-            matchExpressions:
-            - key: "name"
-              operator: "In"
-              values:
-              - kaas-metrics
-              - kaas-monitoring
-          podSelector:
-            matchLabels:
-              app: prometheus
-      ports:
-        - port: 8080
-          protocol: TCP
-  podSelector:
-    matchLabels:
-      component: tsdb
-  policyTypes:
+  selector: component == 'tsdb'
+  types:
     - Ingress
+    - Egress
+  ingress:
+    - action: Allow
+      metadata:
+        annotations:
+          from: prometheus
+          to: tsdb
+      protocol: TCP
+      source:
+        selector: app == 'prometheus'
+        namespaceSelector: name=='kaas-monitoring'
+      destination:
+        ports:
+          - 8080
+    - action: Allow
+      metadata:
+        annotations:
+          from: prometheus
+          to: tsdb
+      protocol: TCP
+      source:
+        selector: app == 'prometheus'
+        namespaceSelector: name=='kaas-metrics'
+      destination:
+        ports:
+          - 8080
+    - action: Allow
+      metadata:
+        annotations:
+          from: grafana
+          to: tsdb
+      protocol: TCP
+      source:
+        selector: component == 'grafana'
+        namespaceSelector: name=='stormforge-system'
+  egress:
+    - action: Allow
