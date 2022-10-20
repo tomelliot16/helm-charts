@@ -37,17 +37,13 @@ variants:
           #
           #-- Avoid electro, loki, or uguisud in PRs --#
 
-# Needs fixing since dev and qa are colliding
-# Figure out a way that QA only deploys 
-# to electro, loki and uguisud
-#
-#  - name: qa
-#    overrides:
-#      standard:
-#        values:
-#          valueFiles:
-#            - values-qa.yaml
-#          targetRevision: v1.1.3
+  - name: qa
+    overrides:
+      standard:
+        values:
+          valueFiles:
+            - values-qa.yaml
+          targetRevision: v1.1.3
 
   - name: staging
     overrides:
