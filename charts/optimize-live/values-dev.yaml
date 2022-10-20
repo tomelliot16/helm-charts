@@ -4,28 +4,30 @@
 
 replicaCount: 1
 
+chart-version: &dev-version main
 component:
   image:
     controller:
       repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/controller
       pullPolicy: Always
-      tag: main
+      tag: *dev-version
     tsdb:
       repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/tsdb
       pullPolicy: Always
-      tag: main
+      tag: *dev-version
     applier:
       repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/applier
       pullPolicy: Always
-      tag: main
+      tag: *dev-version
     recommender:
       repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/recommender
       pullPolicy: Always
-      tag: main
+      tag: *dev-version
     grafana:
       repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/grafana-oss
       pullPolicy: Always
-      tag: main
+      tag: *dev-version
+
   resources:
       # Applications with a large number of autoscaling targets may require increased requests
       # If needing to unset resources, you can use "cpu: null" or "memory: null" in overrides when installing

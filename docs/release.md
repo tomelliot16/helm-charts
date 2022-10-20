@@ -21,7 +21,8 @@ All changes should be made in a branch and presented to the team for review and 
 2. Update the file `.acquia/pipeline.env` with the new versions information.
    
    Following examples use stormforge version `v1.1.0`.
-   ```yaml
+
+   ```bash
    CONTROLLER_VERSION=0.0.21-rc4
    TSDB_VERSION=0.0.14-rc1
    APPLIER_VERSION=0.0.8-rc5
@@ -39,9 +40,16 @@ All changes should be made in a branch and presented to the team for review and 
               targetRevision: MY-PR-BRANCH
    ```
    
-   Clusters csd-hades82db9 or ngcweb-tests-ogre3ff8d9 can be used for tests.
-   Do not use clusters: electro, loki, or uguisud in pull requests.
+   In the same way update the `charts/optimize-live/values-dev.yaml`
+   files with the new tag:
       
+   ```yaml                                                                                                                                                           
+   chart-version: &dev-version MY-PR-BRANCH
+   ```
+   
+   Note: Clusters csd-hades82db9 or ngcweb-tests-ogre3ff8d9 can be used for tests.
+   **Do not use clusters: electro, loki, or uguisud in pull requests.**
+   
 4. Commit the above changes to the remote repository and monitor the [jenkins job](https://core.cloudbees.ais.acquia.io/devops-pipeline-2-jenkins/job/DEVOPS-sre-stormforge-PIPELINE)
    that runs for this branch. Make sure from the console logs in this job that the new stormforge image
    version is downloaded successfully.
@@ -52,7 +60,8 @@ All changes should be made in a branch and presented to the team for review and 
 
    Update the PR details in github with the above job link for team to review while approving the PR.
    
-   Before merging the PR to main branch revert the comment section in the `platform.yaml` file.
+   Before merging the PR to main branch revert the comment section in the `platform.yaml` file:
+
 
    ```yaml
           # clusterOverrides:
@@ -60,6 +69,12 @@ All changes should be made in a branch and presented to the team for review and 
           #     - key: name
           #       value: csd-hades82db9
           #     targetRevision: MY-PR-BRANCH
+   ```
+
+   And revert `charts/optimize-live/values-dev.yaml` file:
+
+   ```yaml                                                                                                                                                           
+   chart-version: &dev-version main
    ```
 
    Now the PR can be merged to the main branch before proceeding further. Make sure to rebase this branch from main and use 
@@ -84,7 +99,7 @@ Create another PR to the main branch this time updating the version in `platform
 using the same branch as before then make sure to rebase the branch from main before making this change and raising the
 PR. Merge this PR to the main branch after all approvals. Make sure to use `Squash and Merge` to do the merge.
 
-e.g.
+Eg.
 
    ```yaml
    - name: qa
@@ -93,7 +108,7 @@ e.g.
          values:
            valueFiles:
              - values.yaml
-           targetRevision: &qa-version v1.1.0
+           targetRevision: v1.1.0
    ```
 
    ```yaml
@@ -103,7 +118,7 @@ e.g.
          values:
            valueFiles:
              - values.yaml
-           targetRevision: &staging-version v1.1.0
+           targetRevision: v1.1.0
    ```   
 
    ```yaml
@@ -113,7 +128,14 @@ e.g.
          values:
            valueFiles:
              - values.yaml
-           targetRevision: &prod-version v1.1.0
+           targetRevision: v1.1.0
+   ```
+
+In the same way update the `charts/optimize-live/values-[qa|staging|prod].yaml` files with the new tag:
+
+   ```
+   chart-version: &[qa|staging|prod]-version v1.1.0 
+
    ```
 
 Ensure that the stormforge app is deployed and running properly in the corresponding `qa`, `staging` and `prod` environments. 
