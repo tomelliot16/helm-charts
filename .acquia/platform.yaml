@@ -35,7 +35,7 @@ variants:
           #       value: csd-hades82db9
           #     targetRevision: MY-PR-BRANCH
           #     valuesFiles:
-          #      - values.yaml
+          #       - values.yaml
           #
           #-- Avoid electro, loki, or uguisud in PRs --#
 
