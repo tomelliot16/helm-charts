@@ -34,6 +34,8 @@ variants:
           #     - key: name
           #       value: csd-hades82db9
           #     targetRevision: MY-PR-BRANCH
+          #     valuesFiles:
+          #      - values.yaml
           #
           #-- Avoid electro, loki, or uguisud in PRs --#
 
@@ -44,10 +46,8 @@ variants:
           valueFiles:
             - values-qa.yaml
           targetRevision: v1.1.3
-          clusterTypes:
-          - "internal"
-          # extraClusterMatchLabels:
-          #   name: csd-electro036
+          extraClusterMatchLabels:
+            name: csd-electro036
 
   - name: staging
     overrides:
