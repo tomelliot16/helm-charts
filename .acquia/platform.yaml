@@ -6,7 +6,7 @@ base:
   # Bootstrap
   standard:
     type: bootstrap
-    version: v0.8.0
+    version: v0.8.1
     values:
       syncPolicy:
         automated:
@@ -30,26 +30,57 @@ variants:
           component:
             image:
               controller:
-                repository: jfrog.ais.acquia.io/devops-pipeline-staging/stormforge/controller
+                repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/controller
                 tag: *dev-version
               tsdb:
-                repository: jfrog.ais.acquia.io/devops-pipeline-staging/stormforge/tsdb
+                repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/tsdb
                 pullPolicy: Always
                 tag: *dev-version
               applier:
-                repository: jfrog.ais.acquia.io/devops-pipeline-staging/stormforge/applier
+                repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/applier
                 tag: *dev-version
               recommender:
-                repository: jfrog.ais.acquia.io/devops-pipeline-staging/stormforge/recommender
+                repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/recommender
                 tag: *dev-version
               grafana:
-                repository: jfrog.ais.acquia.io/devops-pipeline-staging/stormforge/grafana-oss
+                repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/grafana-oss
                 tag: *dev-version
+          #--- Uncomment section if testing in a PR ---#
+          #
           # clusterOverrides:
           #   - selectorLabels:
           #     - key: name
-          #       value: ngcweb-loki1c6bb4
-          #     targetRevision: integration-tests
+          #       value: csd-hades82db9
+          #     targetRevision: MY-PR-BRANCH
+          #
+          #-- Avoid electro, loki, or uguisud in PRs --#
+
+  - name: qa
+    overrides:
+      standard:
+        values:
+          valueFiles:
+            - values.yaml
+          targetRevision: &qa-version v1.1.2
+          component:
+            image:
+              controller:
+                repository: jfrog.ais.acquia.io/devops-pipeline-qa/stormforge/controller
+                tag: *qa-version
+              tsdb:
+                repository: jfrog.ais.acquia.io/devops-pipeline-qa/stormforge/tsdb
+                pullPolicy: Always
+                tag: *qa-version
+              applier:
+                repository: jfrog.ais.acquia.io/devops-pipeline-qa/stormforge/applier
+                tag: *qa-version
+              recommender:
+                repository: jfrog.ais.acquia.io/devops-pipeline-qa/stormforge/recommender
+                tag: *qa-version
+              grafana:
+                repository: jfrog.ais.acquia.io/devops-pipeline-qa/stormforge/grafana-oss
+                tag: *qa-version
+
   - name: staging
     overrides:
       standard:

@@ -15,8 +15,8 @@ All changes should be made in a branch and presented to the team for review and 
 
 ## Configure the new image version and deploy to dev
 
-1. Create a ticket in JIRA for the release and create a Pull Request in this repo from the master branch
-   with the ticket number.
+1. Create a ticket in JIRA for the release and create a Pull Request
+   in this repo from the main branch with the ticket number.
 
 2. Update the file `.acquia/pipeline.env` with the new versions information.
    
@@ -29,19 +29,19 @@ All changes should be made in a branch and presented to the team for review and 
    GRAFANA_VERSION=9.2.1
    ```
 
-3. Update the branch name for the `dev` section in `.acquia/platform.yaml`: 
+3. Uncomment the `clusterOverrides` section for `dev` with your PR branch name in `.acquia/platform.yaml`:
 
    ```yaml
-   variants:
-    - name: dev
-      overrides:
-        standard:
-          values:
-            valueFiles:
-              - values.yaml
-            targetRevision: &dev-version DEVOPS-???
+          clusterOverrides:
+            - selectorLabels:
+              - key: name
+                value: csd-hades82db9
+              targetRevision: MY-PR-BRANCH
    ```
    
+   Clusters csd-hades82db9 or ngcweb-tests-ogre3ff8d9 can be used for tests.
+   Do not use clusters: electro, loki, or uguisud in pull requests.
+      
 4. Commit the above changes to the remote repository and monitor the [jenkins job](https://core.cloudbees.ais.acquia.io/devops-pipeline-2-jenkins/job/DEVOPS-sre-stormforge-PIPELINE)
    that runs for this branch. Make sure from the console logs in this job that the new stormforge image
    version is downloaded successfully.
@@ -52,18 +52,14 @@ All changes should be made in a branch and presented to the team for review and 
 
    Update the PR details in github with the above job link for team to review while approving the PR.
    
-   Before merging the PR to master branch revert the following to point the dev environment back to 
-   master in the `platform.yaml` file.
+   Before merging the PR to main branch revert the comment section in the `platform.yaml` file.
 
    ```yaml
-   variants:
-    - name: dev
-      overrides:
-        standard:
-          values:
-            valueFiles:
-              - values.yaml
-            targetRevision: &dev-version main
+          # clusterOverrides:
+          #   - selectorLabels:
+          #     - key: name
+          #       value: csd-hades82db9
+          #     targetRevision: MY-PR-BRANCH
    ```
 
    Now the PR can be merged to the main branch before proceeding further. Make sure to rebase this branch from main and use 
