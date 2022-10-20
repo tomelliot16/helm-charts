@@ -37,8 +37,6 @@ All changes should be made in a branch and presented to the team for review and 
               - key: name
                 value: csd-hades82db9
               targetRevision: MY-PR-BRANCH
-              valuesFiles:
-                - values.yaml
    ```
    
    In the same way update the `charts/optimize-live/values-dev.yaml`
@@ -61,7 +59,8 @@ All changes should be made in a branch and presented to the team for review and 
 
    Update the PR details in github with the above job link for team to review while approving the PR.
    
-   Before merging the PR to main branch revert the comment section in the `platform.yaml` file.
+   Before merging the PR to main branch revert the comment section in the `platform.yaml` file:
+
 
    ```yaml
           # clusterOverrides:
@@ -69,8 +68,12 @@ All changes should be made in a branch and presented to the team for review and 
           #     - key: name
           #       value: csd-hades82db9
           #     targetRevision: MY-PR-BRANCH
-          #     valuesFiles:
-          #       - values.yaml
+   ```
+
+   And revert `charts/optimize-live/values-dev.yaml` file:
+
+   ```                                                                                                                                                              
+   chart-version: &dev-version main
    ```
 
    Now the PR can be merged to the main branch before proceeding further. Make sure to rebase this branch from main and use 
