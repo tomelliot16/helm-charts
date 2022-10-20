@@ -3,29 +3,30 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-
+chart-version: &qa-version v1.1.2
 component:
   image:
     controller:
       repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/controller
       pullPolicy: Always
-      tag: main
+      tag: *qa-version
     tsdb:
       repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/tsdb
       pullPolicy: Always
-      tag: main
+      tag: *qa-version
     applier:
       repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/applier
       pullPolicy: Always
-      tag: main
+      tag: *qa-version
     recommender:
       repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/recommender
       pullPolicy: Always
-      tag: main
+      tag: *qa-version
     grafana:
       repository: jfrog.ais.acquia.io/devops-pipeline-dev/stormforge/grafana-oss
       pullPolicy: Always
-      tag: main
+      tag: *qa-version
+
   resources:
       # Applications with a large number of autoscaling targets may require increased requests
       # If needing to unset resources, you can use "cpu: null" or "memory: null" in overrides when installing
@@ -166,4 +167,7 @@ storageClass: ""
  # This defaults to 10G
 pvcSize: ""
 
-debug: true
+debug: false
+
+# Debug mode OFF
+# debug: false
