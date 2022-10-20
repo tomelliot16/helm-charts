@@ -55,32 +55,6 @@ variants:
           #
           #-- Avoid electro, loki, or uguisud in PRs --#
 
-  - name: qa
-    overrides:
-      standard:
-        values:
-          valueFiles:
-            - values.yaml
-          targetRevision: &qa-version v1.1.2
-          component:
-            image:
-              controller:
-                repository: jfrog.ais.acquia.io/devops-pipeline-qa/stormforge/controller
-                tag: *qa-version
-              tsdb:
-                repository: jfrog.ais.acquia.io/devops-pipeline-qa/stormforge/tsdb
-                pullPolicy: Always
-                tag: *qa-version
-              applier:
-                repository: jfrog.ais.acquia.io/devops-pipeline-qa/stormforge/applier
-                tag: *qa-version
-              recommender:
-                repository: jfrog.ais.acquia.io/devops-pipeline-qa/stormforge/recommender
-                tag: *qa-version
-              grafana:
-                repository: jfrog.ais.acquia.io/devops-pipeline-qa/stormforge/grafana-oss
-                tag: *qa-version
-
   - name: staging
     overrides:
       standard:
