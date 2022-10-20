@@ -21,7 +21,8 @@ All changes should be made in a branch and presented to the team for review and 
 2. Update the file `.acquia/pipeline.env` with the new versions information.
    
    Following examples use stormforge version `v1.1.0`.
-   ```yaml
+
+   ```bash
    CONTROLLER_VERSION=0.0.21-rc4
    TSDB_VERSION=0.0.14-rc1
    APPLIER_VERSION=0.0.8-rc5
@@ -42,7 +43,7 @@ All changes should be made in a branch and presented to the team for review and 
    In the same way update the `charts/optimize-live/values-dev.yaml`
    files with the new tag:
       
-   ```                                                                                                                                                              
+   ```yaml                                                                                                                                                           
    chart-version: &dev-version MY-PR-BRANCH
    ```
    
@@ -72,7 +73,7 @@ All changes should be made in a branch and presented to the team for review and 
 
    And revert `charts/optimize-live/values-dev.yaml` file:
 
-   ```                                                                                                                                                              
+   ```yaml                                                                                                                                                           
    chart-version: &dev-version main
    ```
 
