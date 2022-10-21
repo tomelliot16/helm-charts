@@ -6,12 +6,11 @@ or a new version of the chart that resided at the root of this repository.
 The release process mentioned below should be followed for the release.
 All changes should be made in a branch and presented to the team for review and approval.
 
-
   - [Configure the new image version and deploy to dev](#configure-the-new-image-version-and-deploy-to-dev)
-  - [Create a new Tag on the main branch](#create-a-new-tag-on-the-main-branch)
-  - [Upgrade qa, staging and prod environments to the new tag.](#upgrade-qa-staging-and-prod-environments-to-the-new-tag)
+  - [Change the chart-version to the new tag](#change-the-chart-version-to-the-new-tag)
+  - [Cut the new Tag from the main branch](#cut-the-new-tag-from-the-main-branch)
+  - [Upgrade qa, staging and prod environments to the new tag in platform.yaml](#upgrade-qa-staging-and-prod-environments-to-the-new-tag-in-platformyaml)
   - [Process to Create Clusters Token using stormforge CLI](#process-to-create-clusters-token-using-stormforge-cli)
-
 
 ## Configure the new image version and deploy to dev
 
@@ -43,20 +42,23 @@ All changes should be made in a branch and presented to the team for review and 
    In the same way update the `charts/optimize-live/values-dev.yaml`
    files with the new tag:
       
-   ```yaml                                                                                                                                                           
+   ```yaml                                                                                                                                                       
    chart-version: &dev-version MY-PR-BRANCH
    ```
    
    Note: Clusters csd-hades82db9 or ngcweb-tests-ogre3ff8d9 can be used for tests.
    **Do not use clusters: electro, loki, or uguisud in pull requests.**
    
-4. Commit the above changes to the remote repository and monitor the [jenkins job](https://core.cloudbees.ais.acquia.io/devops-pipeline-2-jenkins/job/DEVOPS-sre-stormforge-PIPELINE)
+4. Commit the above changes to the remote repository and monitor the
+   [jenkins job](https://core.cloudbees.ais.acquia.io/devops-pipeline-2-jenkins/job/DEVOPS-sre-stormforge-PIPELINE)
    that runs for this branch. Make sure from the console logs in this job that the new stormforge image
    version is downloaded successfully.
    
    Once the above job has run successfully create a PR out of this branch to the master branch. This 
-   should trigger a new [pull request job run](https://core.cloudbees.ais.acquia.io/devops-pipeline-2-jenkins/job/DEVOPS-sre-stormforge-PIPELINE/view/change-requests/) 
-   for the PR and deploy to the PR number specific environment. Ensure that the stormforge app is running properly in the corresponding `dev` environment. 
+   should trigger a new
+   [pull request job run](https://core.cloudbees.ais.acquia.io/devops-pipeline-2-jenkins/job/DEVOPS-sre-stormforge-PIPELINE/view/change-requests/) 
+   for the PR and deploy to the PR number specific environment. Ensure that the stormforge app
+   is running properly in the corresponding `dev` environment. 
 
    Update the PR details in github with the above job link for team to review while approving the PR.
    
@@ -80,7 +82,17 @@ All changes should be made in a branch and presented to the team for review and 
    Now the PR can be merged to the main branch before proceeding further. Make sure to rebase this branch from main and use 
    `Squash and Merge` to do the merge.
 
-## Create a new Tag on the main branch
+## Change the chart-version to the new tag
+
+Update the `charts/optimize-live/values-[qa|staging|prod].yaml` files with the new tag in a Pull Request:
+
+   ```
+   chart-version: &[qa|staging|prod]-version v1.1.0 
+   ```
+   
+Merge these changes to the main branch.
+
+## Cut the new Tag from the main branch
 
 A new tag should now be created for the commit made to the main branch in the above step. For this
 go to [release](https://github.com/acquia/sre-stormforge/releases) and click on `Draft a new release`.
@@ -93,7 +105,7 @@ The tag creation above should trigger a tag based [jenkins job](https://core.clo
 Make sure this job succeeds before proceeding further. The job will create the image tags which will
 eventually be used in updating the qa, staging and prod environments in the steps below.
 
-## Upgrade qa, staging and prod environments to the new tag.
+## Upgrade qa, staging and prod environments to the new tag in platform.yaml
 
 Create another PR to the main branch this time updating the version in `platform.yaml` for the qa,staging and prod environments. If
 using the same branch as before then make sure to rebase the branch from main before making this change and raising the
@@ -131,14 +143,8 @@ Eg.
            targetRevision: v1.1.0
    ```
 
-In the same way update the `charts/optimize-live/values-[qa|staging|prod].yaml` files with the new tag:
-
-   ```
-   chart-version: &[qa|staging|prod]-version v1.1.0 
-
-   ```
-
-Ensure that the stormforge app is deployed and running properly in the corresponding `qa`, `staging` and `prod` environments. 
+Merge the changes to default branch and ensure that the stormforge app is deployed
+and running properly in the corresponding `qa`, `staging` and `prod` environments. 
 
 Next, close the release ticket in JIRA.
 
