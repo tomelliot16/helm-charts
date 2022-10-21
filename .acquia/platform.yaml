@@ -29,11 +29,11 @@ variants:
           targetRevision: main
           #--- Uncomment section if testing in a PR ---#
           #
-          # clusterOverrides:
-          #   - selectorLabels:
-          #     - key: name
-          #       value: csd-hades82db9
-          #     targetRevision: MY-PR-BRANCH
+          #clusterOverrides:
+          #  - selectorLabels:
+          #    - key: name
+          #      value: ngcweb-loki1c6bb4
+          #    targetRevision: DEVOPS-2423
           #
           #-- Avoid electro, loki, or uguisud in PRs --#
 
