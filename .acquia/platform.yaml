@@ -43,7 +43,7 @@ variants:
         values:
           valueFiles:
             - values-qa.yaml
-          targetRevision: v1.1.5
+          targetRevision: v1.1.6
 
   - name: staging
     overrides:
@@ -51,7 +51,7 @@ variants:
         values:
           valueFiles:
             - values-staging.yaml
-          targetRevision: v1.1.5
+          targetRevision: v1.1.6
 
   - name: prod
     overrides:
@@ -59,5 +59,5 @@ variants:
         values:
           valueFiles:
             - values-prod.yaml
-          targetRevision: v1.1.5
+          targetRevision: v1.1.6
 
