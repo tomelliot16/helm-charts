@@ -9,7 +9,7 @@ All changes should be made in a branch and presented to the team for review and 
   - [Configure the new image version and deploy to dev](#configure-the-new-image-version-and-deploy-to-dev)
   - [Change the chart-version to the new tag](#change-the-chart-version-to-the-new-tag)
   - [Cut the new Tag from the main branch](#cut-the-new-tag-from-the-main-branch)
-  - [Upgrade qa, staging and prod environments to the new tag in platform.yaml](#upgrade-qa-staging-and-prod-environments-to-the-new-tag-in-platform-yaml)
+  - [Upgrade qa, staging and prod environments to the new tag in platform.yaml](#upgrade-qa-staging-and-prod-environments-to-the-new-tag-in-platformyaml)
   - [Process to Create Clusters Token using stormforge CLI](#process-to-create-clusters-token-using-stormforge-cli)
 
 ## Configure the new image version and deploy to dev
