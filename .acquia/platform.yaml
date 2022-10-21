@@ -53,3 +53,11 @@ variants:
             - values-staging.yaml
           targetRevision: v1.1.5
 
+  - name: prod
+    overrides:
+      standard:
+        values:
+          valueFiles:
+            - values-prod.yaml
+          targetRevision: v1.1.5
+
