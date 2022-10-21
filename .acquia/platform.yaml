@@ -32,8 +32,8 @@ variants:
           #clusterOverrides:
           #  - selectorLabels:
           #    - key: name
-          #      value: ngcweb-loki1c6bb4
-          #    targetRevision: DEVOPS-2423
+          #      value: csd-hades82db9
+          #    targetRevision: MY-PR-BRANCH
           #
           #-- Avoid electro, loki, or uguisud in PRs --#
 
@@ -43,7 +43,7 @@ variants:
         values:
           valueFiles:
             - values-qa.yaml
-          targetRevision: v1.1.3
+          targetRevision: v1.1.4
 
   - name: staging
     overrides:
@@ -51,5 +51,5 @@ variants:
         values:
           valueFiles:
             - values-staging.yaml
-          targetRevision: v1.1.3
+          targetRevision: v1.1.4
 
