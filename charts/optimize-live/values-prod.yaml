@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-chart-version: &prod-version v1.1.5
+chart-version: &prod-version v1.1.6
 component:
   image:
     controller:
