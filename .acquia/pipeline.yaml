@@ -175,7 +175,7 @@ deploy:
       check_health: true
       timeout: 5
     staging:
-      check_health: false
+      check_health: true
       timeout: 5
     prod:
       check_health: true
