@@ -4,7 +4,7 @@
 
 replicaCount: 1
 
-chart-version: &dev-version main
+chart-version: &dev-version v1.1.6
 component:
   image:
     controller:

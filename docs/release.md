@@ -84,17 +84,19 @@ All changes should be made in a branch and presented to the team for review and 
 
 ## Change the chart-version to the new tag
 
-Update the `charts/optimize-live/values-[qa|staging|prod].yaml` files with the new tag in a Pull Request:
+Decide what [semver](https://semver.org/) to use for the new tag.
+
+Update the `charts/optimize-live/values-[dev|qa|staging|prod].yaml` files with the new tag in a Pull Request:
 
    ```
-   chart-version: &[qa|staging|prod]-version v1.1.0 
+   chart-version: &[dev|qa|staging|prod]-version v1.1.0 
    ```
    
 Merge these changes to the main branch.
 
 ## Cut the new Tag from the main branch
 
-A new tag should now be created for the commit made to the main branch in the above step. For this
+The new tag should now be created for the commit made to the main branch in the above step. For this
 go to [release](https://github.com/acquia/sre-stormforge/releases) and click on `Draft a new release`.
 Click on `Choose a tag` and create the new tag e.g. `v1.1.0`, make sure the `Target` is selected as 
 `main`. Choose a release title according to one of the previous titles updating the version number
