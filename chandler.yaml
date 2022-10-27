@@ -1,0 +1,76 @@
+---
+apiVersion: chandler.acquia.io/v1alpha1
+kind: vendorConfiguration
+config:
+  vendorDirectory: ".vendor/charts/"
+  helmCharts:
+    - relativePath: "charts/sre-stormforge"
+      dependencyCharts:
+        - name: optimize-live
+          type: helm
+          helmRepo: "https://registry.stormforge.io/chartrepo/library/"
+          version: "=0.5.1"
+          chartName: optimize-live
+          outputVariables:
+            - name: ImageControllerTag
+              from: savedFile
+              savedName: values-yaml
+              queryType: yamlPath
+              path: .component.image.controller.tag
+
+            - name: ImageTsdbTag
+              from: savedFile
+              savedName: values-yaml
+              queryType: yamlPath
+              path: .component.image.tsdb.tag
+
+            - name: ImageApplierTag
+              from: savedFile
+              savedName: values-yaml
+              queryType: yamlPath
+              path: .component.image.applier.tag
+
+            - name: ImageRecommenderTag
+              from: savedFile
+              savedName: values-yaml
+              queryType: yamlPath
+              path: .component.image.recommender.tag
+
+            - name: ImageGrafanaTag
+              from: savedFile
+              savedName: values-yaml
+              queryType: yamlPath
+              path: .component.image.grafana.tag
+          adjustments:
+            - type: removeLines
+              lineRemovals:
+                - filesGlob: "*.tpl"
+                  regex: "component: controller"
+            - type: kustomize
+              preExecute:
+                saveFiles:
+                  - name: chart-yaml
+                    path: charts/optimize-live/Chart.yaml
+                  - name: values-yaml
+                    path: charts/optimize-live/values.yaml
+              kustomization:
+                helmCharts:
+                - name: optimize-live
+                  releaseName: optimize-live
+                  valuesFile: .chandler/optimize-live/kustomization-values.yaml
+                  includeCRDs: true
+            - type: removeLines
+              lineRemovals:
+                  - filesGlob: "*.yaml"
+                    regex: "app.kubernetes.io\\/instance"
+                  - filesGlob: "*.yaml"
+                    regex: "app.kubernetes.io\\/managed-by"
+            - type: moveDirectories
+              source: './'
+              destination: './templates'
+            - type: addSavedFiles
+              addFiles:
+                - name: chart-yaml
+                  destinationPath: Chart.yaml
+                - name: values-yaml
+                  destinationPath: values.yaml

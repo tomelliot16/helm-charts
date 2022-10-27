@@ -1,0 +1,17 @@
+# VENDORED FILE FROM. DO NOT EDIT
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: optimize-live
+    app.kubernetes.io/version: 0.1.0
+    helm.sh/chart: optimize-live-0.5.1
+  name: optimize-live
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: optimize-live
+subjects:
+- kind: ServiceAccount
+  name: optimize-live
+  namespace: default

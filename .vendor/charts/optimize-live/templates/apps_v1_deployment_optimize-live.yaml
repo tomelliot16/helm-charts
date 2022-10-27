@@ -1,0 +1,99 @@
+# VENDORED FILE FROM. DO NOT EDIT
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: optimize-live
+    app.kubernetes.io/version: 0.1.0
+    helm.sh/chart: optimize-live-0.5.1
+  name: optimize-live
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: optimize-live
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        configmapChecksum: 351275c0d980f73bf34b25d251e3a010912f9f06cb58bb1c14ac0f4d9db7738b
+        secretChecksum: b9ce39f069353a3f6858d00241ddd60ca6c2511c0804b0129edde08e61f49400
+      labels:
+        app.kubernetes.io/name: optimize-live
+        helm.sh/chart-version: 0.5.1
+    spec:
+      containers:
+      - args:
+        - --config=/live-config.yaml
+        env:
+        - name: IMAGE_PULL_SECRET_NAME
+          value: optimize-live-docker
+        - name: SF_CREDS_SECRET_NAME
+          value: optimize-live
+        - name: COMPONENT_TSDB_IMAGE
+          value: {{.Values.image.tsdb.repository}}:{{.Values.component.image.tsdb.tag}}
+        - name: COMPONENT_APPLIER_IMAGE
+          value: {{.Values.image.applier.repository}}:{{.Values.component.image.applier.tag}}
+        - name: COMPONENT_RECOMMENDER_IMAGE
+          value: {{.Values.image.recommender.repository}}:{{.Values.component.image.recommender.tag}}
+        - name: COMPONENT_GRAFANA_IMAGE
+          value: {{.Values.image.grafana.repository}}:{{.Values.component.image.grafana.tag}}
+        - name: CONTROLLER_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: CONTROLLER_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: CONTROLLER_SERVICE_ACCOUNT
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.serviceAccountName
+        - name: CHART_VERSION
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['helm.sh/chart-version']
+        envFrom:
+        - secretRef:
+            name: optimize-live
+        image: {{.Values.image.controller.repository}}:{{.Values.component.image.controller.tag}}
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        name: optimize-live
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 250m
+            memory: 500Mi
+          requests:
+            cpu: 150m
+            memory: 150Mi
+        securityContext:
+          runAsNonRoot: true
+        volumeMounts:
+        - mountPath: /live-config.yaml
+          name: liveconfig
+          readOnly: true
+          subPath: live-config.yaml
+      enableServiceLinks: false
+      imagePullSecrets:
+      - name: optimize-live-docker
+      securityContext: {}
+      serviceAccountName: optimize-live
+      volumes:
+      - configMap:
+          name: optimize-live
+        name: liveconfig

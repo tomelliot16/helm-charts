@@ -1,0 +1,773 @@
+# VENDORED FILE FROM. DO NOT EDIT
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: lives.optimize.stormforge.io
+spec:
+  group: optimize.stormforge.io
+  names:
+    kind: Live
+    listKind: LiveList
+    plural: lives
+    singular: live
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: Live is the Schema for the lives API.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: LiveSpec defines the desired state of Live.
+            properties:
+              application:
+                description: Application Configuration
+                properties:
+                  appID:
+                    description: ULID
+                    type: string
+                  appName:
+                    description: Friendly Name
+                    type: string
+                  mode:
+                    description: Mode controls how the recommendations should be applied
+                    enum:
+                    - disabled
+                    - manual
+                    - auto
+                    type: string
+                  namespaceSelector:
+                    description: Namespaces to look for resources in
+                    properties:
+                      file:
+                        description: File is used to expand local file system resources.
+                        properties:
+                          path:
+                            description: The file (or directory) name to read.
+                            type: string
+                        required:
+                        - path
+                        type: object
+                      git:
+                        description: Git is used to expand full or partial Git repositories.
+                        properties:
+                          context:
+                            description: The subdirectory context to limit the Git
+                              repository to.
+                            type: string
+                          refspec:
+                            description: The refspec in the repository to checkout.
+                            type: string
+                          repo:
+                            description: The Git repository URL.
+                            type: string
+                        type: object
+                      helm:
+                        description: Helm is used to expand a Helm chart locally (using
+                          `helm template`).
+                        properties:
+                          chart:
+                            description: The chart name to inflate.
+                            type: string
+                          includeTests:
+                            description: Flag to filter out tests from the results.
+                            type: boolean
+                          releaseName:
+                            description: The release name to use when rendering the
+                              chart templates.
+                            type: string
+                          releaseNamespace:
+                            description: The namespace to use when rendering the chart
+                              templates (this is particularly important for charts
+                              that may produce resources in multiple namespaces).
+                            type: string
+                          repo:
+                            description: The repository URL to get the chart from.
+                            type: string
+                          values:
+                            description: The values used to configure the chart.
+                            items:
+                              description: HelmValue specifies a value or value file
+                                for configuring a Helm chart.
+                              properties:
+                                file:
+                                  description: Path to a values.yaml file.
+                                  type: string
+                                forceString:
+                                  description: Flag indicating that numeric like value
+                                    should be quoted as strings (e.g. for environment
+                                    variables).
+                                  type: boolean
+                                loadFile:
+                                  description: Treat value as a file and load the
+                                    contents in place of the actual value.
+                                  type: boolean
+                                name:
+                                  description: Name of an individual name/value to
+                                    set.
+                                  type: string
+                                value:
+                                  description: Value of an individual name/value to
+                                    set.
+                                  type: string
+                              type: object
+                            type: array
+                          version:
+                            description: The specific version of the chart to use
+                              (defaults to the latest release).
+                            type: string
+                        required:
+                        - chart
+                        - repo
+                        type: object
+                      http:
+                        description: HTTP is used to expand HTTP resources.
+                        properties:
+                          url:
+                            description: The HTTP(S) URL to fetch.
+                            type: string
+                        required:
+                        - url
+                        type: object
+                      jsonnet:
+                        description: Jsonnet is used to expand programmatically constructed
+                          resources.
+                        properties:
+                          exec:
+                            description: An anonymous code snippet to evaluate.
+                            type: string
+                          extVar:
+                            description: The list of external variables to evaluate
+                              against.
+                            items:
+                              description: JsonnetParameter specifies inputs to a
+                                Jsonnet program.
+                              properties:
+                                code:
+                                  description: Code to include.
+                                  type: string
+                                codeFile:
+                                  description: The file name containing code to include.
+                                  type: string
+                                name:
+                                  description: The name of the parameter.
+                                  type: string
+                                string:
+                                  description: The string value of the parameter.
+                                  type: string
+                                stringFile:
+                                  description: The file name containing a string parameter
+                                    value.
+                                  type: string
+                              type: object
+                            type: array
+                          filename:
+                            description: The Jsonnet file to evaluate.
+                            type: string
+                          jbPkgHome:
+                            description: Explicit directory to use fo Jsonnet Bundler
+                              support (defaults to "vendor" if "jsonnetfile.json"
+                              is present).
+                            type: string
+                          jbRefresh:
+                            description: Flag to force a Bundler refresh, even if
+                              the package home directory is already present.
+                            type: boolean
+                          jpath:
+                            description: Additional directories to consider when importing
+                              additional Jsonnet code.
+                            items:
+                              type: string
+                            type: array
+                          topLevelArg:
+                            description: The list of top level arguments to evaluate
+                              against.
+                            items:
+                              description: JsonnetParameter specifies inputs to a
+                                Jsonnet program.
+                              properties:
+                                code:
+                                  description: Code to include.
+                                  type: string
+                                codeFile:
+                                  description: The file name containing code to include.
+                                  type: string
+                                name:
+                                  description: The name of the parameter.
+                                  type: string
+                                string:
+                                  description: The string value of the parameter.
+                                  type: string
+                                stringFile:
+                                  description: The file name containing a string parameter
+                                    value.
+                                  type: string
+                              type: object
+                            type: array
+                        type: object
+                      kubernetes:
+                        description: Kubernetes is used to expand resources found
+                          in a Kubernetes cluster.
+                        properties:
+                          namespace:
+                            description: The namespace to look for resources in.
+                            type: string
+                          namespaceSelector:
+                            description: A label selector matching namespaces to look
+                              for resources in.
+                            type: string
+                          namespaces:
+                            description: An explicit list of namespaces to look for
+                              resources in.
+                            items:
+                              type: string
+                            type: array
+                          selector:
+                            description: A label selector to limit which resources
+                              are included. Defaults to "" (match everything).
+                            type: string
+                          types:
+                            description: The list of resource types to include. Defaults
+                              to "deployments,statefulsets,configmaps".
+                            items:
+                              type: string
+                            type: array
+                        type: object
+                      kustomize:
+                        description: Kustomize is used to expand kustomizations.
+                        properties:
+                          root:
+                            description: The Kustomize root to build.
+                            type: string
+                        required:
+                        - root
+                        type: object
+                      resource:
+                        description: Resource is used to expand a list of URL-like
+                          specifications into other Konjure resources.
+                        properties:
+                          resources:
+                            description: The list of URL-like specifications to convert
+                              into Konjure resources.
+                            items:
+                              type: string
+                            type: array
+                        required:
+                        - resources
+                        type: object
+                      secret:
+                        description: Secret is used to expand a Secret resource.
+                        properties:
+                          envs:
+                            description: A list of .env files (files containing `key=value`
+                              pairs) to include on the secret.
+                            items:
+                              type: string
+                            type: array
+                          files:
+                            description: A list of files (or `key=filename` pairs)
+                              to include on the secret.
+                            items:
+                              type: string
+                            type: array
+                          literals:
+                            description: A list of `key=value` pairs to include on
+                              the secret.
+                            items:
+                              type: string
+                            type: array
+                          passwords:
+                            description: A list of password recipes to include random
+                              strings on the secret.
+                            items:
+                              description: PasswordRecipe is used to configure random
+                                password strings for secrets.
+                              properties:
+                                allowRepeat:
+                                  description: Flag restricting repeating characters.
+                                  type: boolean
+                                key:
+                                  description: The key in the secret data field to
+                                    use.
+                                  type: string
+                                length:
+                                  description: The length of the password.
+                                  type: integer
+                                noUpper:
+                                  description: Flag restricting the use of uppercase
+                                    characters.
+                                  type: boolean
+                                numDigits:
+                                  description: The number of digits to include in
+                                    the password.
+                                  type: integer
+                                numSymbols:
+                                  description: The number of symbol characters to
+                                    include in the password.
+                                  type: integer
+                              required:
+                              - key
+                              type: object
+                            type: array
+                          secretName:
+                            description: The name of the secret to generate.
+                            type: string
+                          type:
+                            description: The type of secret to generate.
+                            type: string
+                          ulids:
+                            description: A list of keys to include randomly generated
+                              ULIDs for on the secret.
+                            items:
+                              type: string
+                            type: array
+                          uuids:
+                            description: A list of keys to include randomly generated
+                              UUIDs for on the secret.
+                            items:
+                              type: string
+                            type: array
+                        required:
+                        - secretName
+                        type: object
+                    type: object
+                  resources:
+                    description: Resources of the target object we want to highlight
+                      ( replicas, resources, env )
+                    items:
+                      description: Resource (optimize/application/v1alpha1/Parameter)
+                        describes the strategy for tuning the application.
+                      properties:
+                        bounds:
+                          description: Bounds defines the resource constraints that
+                            recommendations should be made within. Deprecated, ContainerResources.Bounds
+                            should be used instead
+                          properties:
+                            limits:
+                              description: Limits
+                              properties:
+                                max:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                    x-kubernetes-int-or-string: true
+                                  description: ResourceList is a set of (resource
+                                    name, quantity) pairs.
+                                  type: object
+                                min:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                    x-kubernetes-int-or-string: true
+                                  description: ResourceList is a set of (resource
+                                    name, quantity) pairs.
+                                  type: object
+                              type: object
+                            max:
+                              additionalProperties:
+                                anyOf:
+                                - type: integer
+                                - type: string
+                                pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                x-kubernetes-int-or-string: true
+                              description: Max defines the upper limit for `limits`
+                                resources. Deprecated, use `Requests` or `Limits`
+                                instead
+                              type: object
+                            min:
+                              additionalProperties:
+                                anyOf:
+                                - type: integer
+                                - type: string
+                                pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                x-kubernetes-int-or-string: true
+                              description: Min defines the lower limit for `limits`
+                                resources. Deprecated, use `Requests` or `Limits`
+                                instead
+                              type: object
+                            requests:
+                              description: Requests
+                              properties:
+                                max:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                    x-kubernetes-int-or-string: true
+                                  description: ResourceList is a set of (resource
+                                    name, quantity) pairs.
+                                  type: object
+                                min:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                    x-kubernetes-int-or-string: true
+                                  description: ResourceList is a set of (resource
+                                    name, quantity) pairs.
+                                  type: object
+                              type: object
+                            type:
+                              description: Type defines where this bound should be
+                                applied to. Deprecated, use `Requests` or `Limits`
+                                instead
+                              type: string
+                          type: object
+                        containerResources:
+                          description: Information related to the discovery of container
+                            resources parameters like CPU and memory.
+                          properties:
+                            bounds:
+                              description: Bounds defines the resource constraints
+                                that recommendations should be made within.
+                              properties:
+                                limits:
+                                  description: Limits
+                                  properties:
+                                    max:
+                                      additionalProperties:
+                                        anyOf:
+                                        - type: integer
+                                        - type: string
+                                        pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                        x-kubernetes-int-or-string: true
+                                      description: ResourceList is a set of (resource
+                                        name, quantity) pairs.
+                                      type: object
+                                    min:
+                                      additionalProperties:
+                                        anyOf:
+                                        - type: integer
+                                        - type: string
+                                        pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                        x-kubernetes-int-or-string: true
+                                      description: ResourceList is a set of (resource
+                                        name, quantity) pairs.
+                                      type: object
+                                  type: object
+                                max:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                    x-kubernetes-int-or-string: true
+                                  description: Max defines the upper limit for `limits`
+                                    resources. Deprecated, use `Requests` or `Limits`
+                                    instead
+                                  type: object
+                                min:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                    x-kubernetes-int-or-string: true
+                                  description: Min defines the lower limit for `limits`
+                                    resources. Deprecated, use `Requests` or `Limits`
+                                    instead
+                                  type: object
+                                requests:
+                                  description: Requests
+                                  properties:
+                                    max:
+                                      additionalProperties:
+                                        anyOf:
+                                        - type: integer
+                                        - type: string
+                                        pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                        x-kubernetes-int-or-string: true
+                                      description: ResourceList is a set of (resource
+                                        name, quantity) pairs.
+                                      type: object
+                                    min:
+                                      additionalProperties:
+                                        anyOf:
+                                        - type: integer
+                                        - type: string
+                                        pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                        x-kubernetes-int-or-string: true
+                                      description: ResourceList is a set of (resource
+                                        name, quantity) pairs.
+                                      type: object
+                                  type: object
+                                type:
+                                  description: Type defines where this bound should
+                                    be applied to. Deprecated, use `Requests` or `Limits`
+                                    instead
+                                  type: string
+                              type: object
+                            selector:
+                              description: Label selector of Kubernetes objects to
+                                consider when generating container resources patches.
+                              type: string
+                            tolerance:
+                              description: Tolerance defines how aggressive the recommendations
+                                should be.
+                              properties:
+                                cpu:
+                                  enum:
+                                  - low
+                                  - medium
+                                  - high
+                                  type: string
+                                cpuRisk:
+                                  description: Deprecated, use `CPU` instead
+                                  enum:
+                                  - low
+                                  - medium
+                                  - high
+                                  type: string
+                                memory:
+                                  enum:
+                                  - low
+                                  - medium
+                                  - high
+                                  type: string
+                                memoryRisk:
+                                  description: Deprecated, use `Memory` instead
+                                  enum:
+                                  - low
+                                  - medium
+                                  - high
+                                  type: string
+                              type: object
+                          type: object
+                        interval:
+                          description: Interval specifies how frequently recommendations
+                            should be applied. It is equivalent to the field "Frequency"
+                            of the Optimize Live UI.
+                          type: string
+                        tolerance:
+                          description: Tolerance only applies for ContainerResources,
+                            not Replicas (or env.. ) Deprecated, ContainerResources.Tolerance
+                            should be used instead
+                          properties:
+                            cpu:
+                              enum:
+                              - low
+                              - medium
+                              - high
+                              type: string
+                            cpuRisk:
+                              description: Deprecated, use `CPU` instead
+                              enum:
+                              - low
+                              - medium
+                              - high
+                              type: string
+                            memory:
+                              enum:
+                              - low
+                              - medium
+                              - high
+                              type: string
+                            memoryRisk:
+                              description: Deprecated, use `Memory` instead
+                              enum:
+                              - low
+                              - medium
+                              - high
+                              type: string
+                          type: object
+                        updateInterval:
+                          description: Deprecated, use `Interval` instead.
+                          type: string
+                      required:
+                      - interval
+                      type: object
+                    type: array
+                required:
+                - appID
+                - appName
+                - mode
+                - namespaceSelector
+                - resources
+                type: object
+              components:
+                description: Individual component configuration
+                items:
+                  properties:
+                    config:
+                      description: Additional per component configuration.
+                      type: string
+                    enabled:
+                      description: Enabled dictates if the controller should skip
+                        the reconciliation for this component.
+                      type: boolean
+                    image:
+                      description: Image can be used to override the default image
+                        configured with the controller.
+                      type: string
+                    imagePullPolicy:
+                      description: ImagePullPolicy can be used to override the default
+                        image pull policy configured with the controller.
+                      type: string
+                    name:
+                      enum:
+                      - tsdb
+                      - recommender
+                      - applier
+                      - grafana
+                      type: string
+                  required:
+                  - enabled
+                  - name
+                  type: object
+                type: array
+              env:
+                description: Global Env to set on every component
+                items:
+                  description: EnvVar represents an environment variable present in
+                    a Container.
+                  properties:
+                    name:
+                      description: Name of the environment variable. Must be a C_IDENTIFIER.
+                      type: string
+                    value:
+                      description: 'Variable references $(VAR_NAME) are expanded using
+                        the previously defined environment variables in the container
+                        and any service environment variables. If a variable cannot
+                        be resolved, the reference in the input string will be unchanged.
+                        Double $$ are reduced to a single $, which allows for escaping
+                        the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will produce the
+                        string literal "$(VAR_NAME)". Escaped references will never
+                        be expanded, regardless of whether the variable exists or
+                        not. Defaults to "".'
+                      type: string
+                    valueFrom:
+                      description: Source for the environment variable's value. Cannot
+                        be used if value is not empty.
+                      properties:
+                        configMapKeyRef:
+                          description: Selects a key of a ConfigMap.
+                          properties:
+                            key:
+                              description: The key to select.
+                              type: string
+                            name:
+                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                TODO: Add other useful fields. apiVersion, kind, uid?'
+                              type: string
+                            optional:
+                              description: Specify whether the ConfigMap or its key
+                                must be defined
+                              type: boolean
+                          required:
+                          - key
+                          type: object
+                        fieldRef:
+                          description: 'Selects a field of the pod: supports metadata.name,
+                            metadata.namespace, `metadata.labels[''<KEY>'']`, `metadata.annotations[''<KEY>'']`,
+                            spec.nodeName, spec.serviceAccountName, status.hostIP,
+                            status.podIP, status.podIPs.'
+                          properties:
+                            apiVersion:
+                              description: Version of the schema the FieldPath is
+                                written in terms of, defaults to "v1".
+                              type: string
+                            fieldPath:
+                              description: Path of the field to select in the specified
+                                API version.
+                              type: string
+                          required:
+                          - fieldPath
+                          type: object
+                        resourceFieldRef:
+                          description: 'Selects a resource of the container: only
+                            resources limits and requests (limits.cpu, limits.memory,
+                            limits.ephemeral-storage, requests.cpu, requests.memory
+                            and requests.ephemeral-storage) are currently supported.'
+                          properties:
+                            containerName:
+                              description: 'Container name: required for volumes,
+                                optional for env vars'
+                              type: string
+                            divisor:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              description: Specifies the output format of the exposed
+                                resources, defaults to "1"
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            resource:
+                              description: 'Required: resource to select'
+                              type: string
+                          required:
+                          - resource
+                          type: object
+                        secretKeyRef:
+                          description: Selects a key of a secret in the pod's namespace
+                          properties:
+                            key:
+                              description: The key of the secret to select from.  Must
+                                be a valid secret key.
+                              type: string
+                            name:
+                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                TODO: Add other useful fields. apiVersion, kind, uid?'
+                              type: string
+                            optional:
+                              description: Specify whether the Secret or its key must
+                                be defined
+                              type: boolean
+                          required:
+                          - key
+                          type: object
+                      type: object
+                  required:
+                  - name
+                  type: object
+                type: array
+              labels:
+                additionalProperties:
+                  type: string
+                description: Global Labels to set on every component
+                type: object
+            required:
+            - application
+            - components
+            type: object
+          status:
+            description: LiveStatus defines the observed state of Live.
+            properties:
+              controllerVersion:
+                description: ControllerVersion contains a version string for the controller
+                  that last updated this CRD. This is used for handling resource updates.
+                type: string
+            required:
+            - controllerVersion
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

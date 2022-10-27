@@ -1,0 +1,13 @@
+# VENDORED FILE FROM. DO NOT EDIT
+apiVersion: v2
+appVersion: 0.1.0
+description: StormForge Optimize Live applies machine learning to your existing observability
+  metrics to make real-time, actionable recommendations to resource settings for any
+  deployment running in Kubernetes
+home: https://www.stormforge.io/
+icon: https://app.stormforge.io/img/logo.png
+maintainers:
+- name: grambot
+name: optimize-live
+type: application
+version: 0.5.1

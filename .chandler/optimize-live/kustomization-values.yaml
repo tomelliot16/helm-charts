@@ -1,0 +1,17 @@
+component:
+  image:
+    controller:
+      repository: {{.Values.image.controller.repository}}
+      tag: {{.Values.component.image.controller.tag}}
+    tsdb:
+      repository: {{.Values.image.tsdb.repository}}
+      tag: {{.Values.component.image.tsdb.tag}}
+    applier:
+      repository: {{.Values.image.applier.repository}}
+      tag: {{.Values.component.image.applier.tag}}
+    recommender:
+      repository: {{.Values.image.recommender.repository}}
+      tag: {{.Values.component.image.recommender.tag}}
+    grafana:
+      repository: {{.Values.image.grafana.repository}}
+      tag: {{.Values.component.image.grafana.tag}}
